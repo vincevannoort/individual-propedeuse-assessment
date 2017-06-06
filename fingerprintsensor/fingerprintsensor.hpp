@@ -28,6 +28,11 @@ public:
 Communication functions
 */
 namespace Communication {
+    namespace Protocols {
+        class Command_packet {}
+        class Response_packet {}
+        class Data_packet {}
+    }
     namespace Commands {
         int initialise();
         int send();
@@ -49,8 +54,6 @@ namespace Communication {
         int set_security_level();
         int get_security_level();
         int terminate();
-    }
-    namespace Response {
     }
     namespace Data {
         int send();
