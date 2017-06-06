@@ -1,4 +1,8 @@
 #include "fingerprintsensor.hpp"
+
+/*
+Constructors
+*/
 Fingerprintsensor::Fingerprintsensor() {
 
     /*
@@ -68,5 +72,12 @@ Fingerprintsensor::Fingerprintsensor() {
     data_packet["START_CODE_2"] = 0xAA;
     data_packet["DEVICE_ID_1"]  = 0x01;
     data_packet["DEVICE_ID_2"]  = 0x00;
+    
+}
+
+/*
+Communication Commands functions
+*/
+Fingerprintsensor::Communication::Commands::initialise() {
     
 }
