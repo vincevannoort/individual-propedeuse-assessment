@@ -64,20 +64,12 @@ Fingerprintsensor::Fingerprintsensor() {
     response_packet["NACK_INVALID_PARAM"]         = 0x1011;
     response_packet["NACK_FINGER_IS_NOT_PRESSED"] = 0x1012;
     response_packet["INVALID"]                    = 0XFFFF;
-
-    /*
-    Data packet
-    */
-    data_packet["START_CODE_1"] = 0x55;
-    data_packet["START_CODE_2"] = 0xAA;
-    data_packet["DEVICE_ID_1"]  = 0x01;
-    data_packet["DEVICE_ID_2"]  = 0x00;
     
 }
 
 /*
 Communication Commands functions
 */
-Fingerprintsensor::Communication::Commands::initialise() {
-    
+int Fingerprintsensor::initialise() {
+    return 0;
 }
