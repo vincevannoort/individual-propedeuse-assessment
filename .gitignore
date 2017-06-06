@@ -30,3 +30,5 @@
 main.ld
 main.map
 bmptk_fixed_size_stack.c
+main.elf
+main.bin
