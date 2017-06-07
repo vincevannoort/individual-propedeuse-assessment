@@ -20,7 +20,6 @@ SEARCH  :=
 # settings for Arduino Due projects
 TARGET            := arduino_due
 SERIAL_PORT       ?= COM3
-CONSOLE_BAUDRATE  := 2400
 
 # the location of the ti software directory
 TI-SOFTWARE       := C:/ti-software

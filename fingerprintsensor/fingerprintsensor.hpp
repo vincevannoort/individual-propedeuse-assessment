@@ -25,6 +25,7 @@ protected:
     */
     hwlib::pin_out & tx;
     hwlib::pin_in & rx;
+    const bool debug = true;
 
 
     /*
@@ -93,7 +94,7 @@ protected:
 
 public:
     /*
-    Communication functions
+    Classes
     */
 
     // @brief Command packet for sending commands, 12 bytes are being send
@@ -105,6 +106,7 @@ public:
         double_word parameter;
         word command;
         word checksum;
+
     public:
         Command_packet();
         void set_parameter(double_word input_parameter);
@@ -144,6 +146,17 @@ public:
     int set_security_level();
     int get_security_level();
     int terminate();
+
+    /*
+    Debugging OLED
+    */
+    hwlib::target::pin_oc scl                 = hwlib::target::pin_oc( hwlib::target::pins::scl );
+    hwlib::target::pin_oc sda                 = hwlib::target::pin_oc( hwlib::target::pins::sda );
+    hwlib::i2c_bus_bit_banged_scl_sda i2c_bus = hwlib::i2c_bus_bit_banged_scl_sda( scl, sda );
+    hwlib::glcd_oled oled                     = hwlib::glcd_oled( i2c_bus, 0x3c ); 
+
+    hwlib::font_default_8x8 font              = hwlib::font_default_8x8();
+    hwlib::window_ostream display             = hwlib::window_ostream( oled, font );
 };
 
 #endif

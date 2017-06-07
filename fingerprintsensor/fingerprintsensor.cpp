@@ -1,4 +1,5 @@
 #include "fingerprintsensor.hpp"
+#include "hwlib.hpp"
 
 /*
 Constructors
@@ -51,6 +52,21 @@ void Fingerprintsensor::Command_packet::setup_parameters_command_checksum(double
     set_checksum(calculate_checksum());
 }
 
+// @brief Send the command which should be initialized from this packet via the UART protocol
+void Fingerprintsensor::Command_packet::send() {
+    auto tx_pin = hwlib::target::pin_out( hwlib::target::pins::d18 );
+    byte packet[12];
+    packet[0] = start_code1;
+    packet[1] = start_code2;
+    packet[2] = device_id;
+    packet[4] = parameter;
+    packet[8] = command;
+    packet[10] = checksum;
+    for (const byte & packet_byte : packet) {
+        hwlib::uart_putc_bit_banged_pin(packet_byte, tx_pin);
+    }
+}
+
 /*
 Communication Commands functions
 */
@@ -58,7 +74,12 @@ Communication Commands functions
 // @brief Initialise the fingerprint sensor
 int Fingerprintsensor::initialise() {
     Fingerprintsensor::Command_packet command_packet;
-    command_packet.setup_parameters_command_checksum(0x00000000, ((word) Fingerprintsensor::command_packet_data::Open));
+    command_packet.setup_parameters_command_checksum(0x00000001, ((word) Fingerprintsensor::command_packet_data::Open));
+    command_packet.send();
+
+    if (debug) {
+        display << "\f" << "Initialise:" << "\n" << command_packet.calculate_checksum() << hwlib::flush;
+    } 
     return 0;
 }
 
@@ -70,5 +91,10 @@ int Fingerprintsensor::control_led(bool on) {
     if (on) { input_parameter = 0x00000001; } 
     else {  input_parameter = 0x00000000; }
     command_packet.setup_parameters_command_checksum(input_parameter, ((word) Fingerprintsensor::command_packet_data::CmosLed));
+    command_packet.send();
+
+    if (debug) {
+        display << "\f" << "Control_led:" << "\n" << command_packet.calculate_checksum() << hwlib::flush;
+    } 
     return 0;
 }
