@@ -18,6 +18,7 @@ public:
     Constructor
     */
     Fingerprintsensor(hwlib::pin_out & tx, hwlib::pin_in & rx);
+    ~Fingerprintsensor();
 
 protected:
     /*

@@ -2,10 +2,10 @@
 #include "hwlib.hpp"
 
 /*
-Constructors
+Constructor & Deconstructor
 */
-Fingerprintsensor::Fingerprintsensor(hwlib::pin_out & tx, hwlib::pin_in & rx):
-tx(tx), rx(rx) {}
+Fingerprintsensor::Fingerprintsensor(hwlib::pin_out & tx, hwlib::pin_in & rx): tx(tx), rx(rx) {}
+Fingerprintsensor::~Fingerprintsensor(){ terminate(); }
 
 /*
 Constructors
@@ -95,6 +95,18 @@ int Fingerprintsensor::control_led(bool on) {
 
     if (debug) {
         display << "\f" << "Control_led:" << "\n" << command_packet.calculate_checksum() << hwlib::flush;
+    } 
+    return 0;
+}
+
+// @brief Terminate/close the fingerprint sensor
+void Fingerprintsensor::terminate() {
+    Fingerprintsensor::Command_packet command_packet;
+    command_packet.setup_parameters_command_checksum(0x00, ((word) Fingerprintsensor::command_packet_data::Close));
+    command_packet.send();
+
+    if (debug) {
+        display << "\f" << "Terminate:" << "\n" << command_packet.calculate_checksum() << hwlib::flush;
     } 
     return 0;
 }
