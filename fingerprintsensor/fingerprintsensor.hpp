@@ -2,6 +2,8 @@
 #define FINGERPRINTSENSOR_H
 
 #include <stdint.h>
+#include "hwlib.hpp"
+
 using namespace std;
 typedef uint8_t byte;
 typedef int16_t word;
@@ -14,9 +16,16 @@ class Fingerprintsensor {
 
 protected:
     /*
+    Pins used for UART communication
+    */
+    hwlib::pin_out & tx;
+    hwlib::pin_in & rx;
+
+
+    /*
     Command packet
     */
-    enum command_packet {
+    enum class command_packet {
         NotSet              = 0x00,
         Open                = 0x01,
         Close               = 0x02,
@@ -54,7 +63,7 @@ protected:
     /*
     Response packet
     */
-    enum response_packet {
+    enum class response_packet {
         NO_ERROR                   = 0x0000,
         NACK_TIMEOUT               = 0x1001,
         NACK_INVALID_BAUDRATE      = 0x1002,
@@ -81,22 +90,41 @@ public:
     /*
     Constructor
     */
-    Fingerprintsensor();
+    Fingerprintsensor(hwlib::pin_out & tx, hwlib::pin_in & rx);
 
     /*
     Communication functions
     */
+
+    // @brief Command packet for sending commands, 12 bytes are being send
     class Command_packet {
+    protected:
         const byte start_code1 = 0x55;
         const byte start_code2 = 0xAA;
         const word device_id = 0x0001;
         double_word parameter;
         word command;
         word checksum;
+    public:
         Command_packet();
+        void set_parameter(double_word input_parameter);
+        void set_command(word input_command);
+        void set_checksum(word input_checksum);
+        word calculate_checksum();
+        void setup_parameters_command_checksum(double_word input_parameter, word input_command);
+        void send();
     };
+
+    // @brief Response packet for recieving commands, 12 bytes being recieved
     class Response_packet {};
-    class Data_packet {};
+
+    // @brief Data packet for sending and recieving
+    class Data_packet {
+    // protected:
+    //     byte packet[12];
+    // public:
+    //     Data_packet(Fingerprintsensor::Command_packet command_packet);
+    };
 
     /*
     Functions
@@ -105,7 +133,7 @@ public:
     int send();
     int recieve();
     int execute();
-    int control_led();
+    int control_led(bool on);
     int change_baud_rate();
     int get_enrolled_fingerprint_count();
     int check_enrollment_status();

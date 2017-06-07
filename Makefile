@@ -18,7 +18,8 @@ HEADERS := fingerprintsensor/fingerprintsensor.hpp
 SEARCH  := 
 
 # settings for Arduino Due projects
-TARGET            := arduino_due
+# TARGET            := arduino_due
+TARGET            := native
 SERIAL_PORT       ?= COM3
 CONSOLE_BAUDRATE  := 2400
 
