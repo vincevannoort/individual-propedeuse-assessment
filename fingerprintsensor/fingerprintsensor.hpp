@@ -98,7 +98,7 @@ public:
     Classes
     */
 
-    // @brief Command packet for sending commands, 12 bytes are being send
+    // @brief Command packet for sending commands, which consists of 12 bytes
     class Command_packet {
     protected:
         const byte start_code1 = 0x55;

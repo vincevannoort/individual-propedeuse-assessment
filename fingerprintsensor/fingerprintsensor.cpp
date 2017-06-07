@@ -6,7 +6,13 @@
 /*
 Constructor & Deconstructor
 */
+
+// @brief Constructor for Fingerprintsensor
+// @param hwlib::pin_out & tx, pin used for sending data/commands
+// @param hwlib::pin_in & rx, pin used for recieving data/commands
 Fingerprintsensor::Fingerprintsensor(hwlib::pin_out & tx, hwlib::pin_in & rx): tx(tx), rx(rx) {}
+
+// @brief Deconstructor for Fingerprintsensor, terminates when program ends
 Fingerprintsensor::~Fingerprintsensor(){ terminate(); }
 
 /*
