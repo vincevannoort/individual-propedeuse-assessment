@@ -3,7 +3,7 @@
 /*
 Constructors
 */
-Fingerprintsensor::Fingerprintsensor(hwlib::pin_out & tx, hwlib::pin_out & rx):  
+Fingerprintsensor::Fingerprintsensor(hwlib::pin_out & tx, hwlib::pin_in & rx):
 tx(tx), rx(rx) {}
 
 /*
@@ -58,7 +58,7 @@ Communication Commands functions
 // @brief Initialise the fingerprint sensor
 int Fingerprintsensor::initialise() {
     Fingerprintsensor::Command_packet command_packet;
-    command_packet.setup_parameters_command_checksum(0x00000000, Fingerprintsensor::command_packet::Open);
+    command_packet.setup_parameters_command_checksum(0x00000000, ((word) Fingerprintsensor::command_packet_data::Open));
     return 0;
 }
 
@@ -69,6 +69,6 @@ int Fingerprintsensor::control_led(bool on) {
     double input_parameter;
     if (on) { input_parameter = 0x00000001; } 
     else {  input_parameter = 0x00000000; }
-    command_packet.setup_parameters_command_checksum(input_parameter, Fingerprintsensor::command_packet::CmosLed);
+    command_packet.setup_parameters_command_checksum(input_parameter, ((word) Fingerprintsensor::command_packet_data::CmosLed));
     return 0;
 }

@@ -13,6 +13,11 @@ typedef int32_t double_word;
 Fingerprintsensor
 */
 class Fingerprintsensor {
+public:
+    /*
+    Constructor
+    */
+    Fingerprintsensor(hwlib::pin_out & tx, hwlib::pin_in & rx);
 
 protected:
     /*
@@ -25,7 +30,7 @@ protected:
     /*
     Command packet
     */
-    enum class command_packet {
+    enum class command_packet_data {
         NotSet              = 0x00,
         Open                = 0x01,
         Close               = 0x02,
@@ -63,7 +68,7 @@ protected:
     /*
     Response packet
     */
-    enum class response_packet {
+    enum class response_packet_data {
         NO_ERROR                   = 0x0000,
         NACK_TIMEOUT               = 0x1001,
         NACK_INVALID_BAUDRATE      = 0x1002,
@@ -87,11 +92,6 @@ protected:
     };
 
 public:
-    /*
-    Constructor
-    */
-    Fingerprintsensor(hwlib::pin_out & tx, hwlib::pin_in & rx);
-
     /*
     Communication functions
     */
@@ -119,12 +119,7 @@ public:
     class Response_packet {};
 
     // @brief Data packet for sending and recieving
-    class Data_packet {
-    // protected:
-    //     byte packet[12];
-    // public:
-    //     Data_packet(Fingerprintsensor::Command_packet command_packet);
-    };
+    class Data_packet {};
 
     /*
     Functions
