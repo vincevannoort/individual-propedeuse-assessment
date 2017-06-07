@@ -142,7 +142,7 @@ public:
     int delete_all_fingerprints();
     int verification_1_1();
     int indentification_1_N();
-    int capture_fingerprint();
+    int capture_fingerprint(char quality[]);
     int make_template();
     int set_security_level();
     int get_security_level();

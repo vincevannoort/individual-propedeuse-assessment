@@ -1,4 +1,6 @@
 #include "fingerprintsensor.hpp"
+
+#include <cstring>
 #include "hwlib.hpp"
 
 /*
@@ -127,7 +129,7 @@ int Fingerprintsensor::start_enrollment(int id) {
 }
 
 // @brief Function for each of the 3 enrollments based on the parameter
-// @param int template
+// @param int template, control over the enrollment number
 int Fingerprintsensor::enrollment(int template_number) {
     Fingerprintsensor::Command_packet command_packet;
     word input_command;
@@ -143,6 +145,25 @@ int Fingerprintsensor::enrollment(int template_number) {
 
     if (debug) {
         display << "\f" << "Enrollment" << template_number << ":" << "\n" << command_packet.calculate_checksum() << hwlib::flush;
+    }
+    return 0;
+}
+
+// @brief Capture a fingerprint on the fingerprintsensor
+// @param int quality, controls the quality taken with the fingerprintsensor.
+int Fingerprintsensor::capture_fingerprint(char quality[]) {
+    Fingerprintsensor::Command_packet command_packet;
+    double input_parameter;
+    if (strcmp(quality, "fast")) {
+        input_parameter = 0x00;
+    } else if (strcmp(quality, "best")) {
+        input_parameter = 0x01;
+    }
+    command_packet.setup_parameters_command_checksum(input_parameter, ((word) command_packet_data::CaptureFinger));
+    command_packet.send();
+
+    if (debug) {
+        display << "\f" << "Capture:" << "\n" << command_packet.calculate_checksum() << hwlib::flush;
     }
     return 0;
 }
