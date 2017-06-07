@@ -126,6 +126,27 @@ int Fingerprintsensor::start_enrollment(int id) {
     return 0;
 }
 
+// @brief Function for each of the 3 enrollments based on the parameter
+// @param int template
+int Fingerprintsensor::enrollment(int template_number) {
+    Fingerprintsensor::Command_packet command_packet;
+    word input_command;
+    if (template_number == 1) {
+        input_command = ((word) command_packet_data::Enroll1);
+    } else if ( template_number == 2) {
+        input_command = ((word) command_packet_data::Enroll2);
+    } else if ( template_number == 3) {
+        input_command = ((word) command_packet_data::Enroll3);
+    }
+    command_packet.setup_parameters_command_checksum(0x00, input_command);
+    command_packet.send();
+
+    if (debug) {
+        display << "\f" << "Enrollment" << template_number << ":" << "\n" << command_packet.calculate_checksum() << hwlib::flush;
+    }
+    return 0;
+}
+
 // @brief Terminate/close the fingerprint sensor
 int Fingerprintsensor::terminate() {
     Fingerprintsensor::Command_packet command_packet;

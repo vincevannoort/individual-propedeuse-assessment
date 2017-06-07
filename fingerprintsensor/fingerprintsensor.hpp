@@ -136,7 +136,7 @@ public:
     int get_enrolled_fingerprint_count();
     int check_enrollment_status();
     int start_enrollment(int id);
-    int enrollment();
+    int enrollment(int template_number);
     int check_finger_pressing_status();
     int delete_one_fingerprint();
     int delete_all_fingerprints();
