@@ -74,7 +74,7 @@ Communication Commands functions
 // @brief Initialise the fingerprint sensor
 int Fingerprintsensor::initialise() {
     Fingerprintsensor::Command_packet command_packet;
-    command_packet.setup_parameters_command_checksum(0x00000001, ((word) Fingerprintsensor::command_packet_data::Open));
+    command_packet.setup_parameters_command_checksum(0x01, ((word) command_packet_data::Open));
     command_packet.send();
 
     if (debug) {
@@ -88,9 +88,9 @@ int Fingerprintsensor::initialise() {
 int Fingerprintsensor::control_led(bool on) {
     Fingerprintsensor::Command_packet command_packet;
     double input_parameter;
-    if (on) { input_parameter = 0x00000001; } 
-    else {  input_parameter = 0x00000000; }
-    command_packet.setup_parameters_command_checksum(input_parameter, ((word) Fingerprintsensor::command_packet_data::CmosLed));
+    if (on) { input_parameter = 0x01; } 
+    else {  input_parameter = 0x00; }
+    command_packet.setup_parameters_command_checksum(input_parameter, ((word) command_packet_data::CmosLed));
     command_packet.send();
 
     if (debug) {
@@ -99,14 +99,41 @@ int Fingerprintsensor::control_led(bool on) {
     return 0;
 }
 
-// @brief Terminate/close the fingerprint sensor
-void Fingerprintsensor::terminate() {
+// @brief Get enrolled fingerprint count
+int Fingerprintsensor::get_enrolled_fingerprint_count() {
     Fingerprintsensor::Command_packet command_packet;
-    command_packet.setup_parameters_command_checksum(0x00, ((word) Fingerprintsensor::command_packet_data::Close));
+    command_packet.setup_parameters_command_checksum(0x00, ((word) command_packet_data::GetEnrollCount));
+    command_packet.send();
+    int count = 0; // TEMPORARY TILL RESPONSE IMPLEMENTED
+
+    if (debug) {
+        display << "\f" << "Get count:" << "\n" << command_packet.calculate_checksum() << hwlib::flush;
+    } 
+    return count;
+}
+
+// @brief Start a fingerprint enrollment
+// @param int id, value between 0 - 19
+int Fingerprintsensor::start_enrollment(int id) {
+    Fingerprintsensor::Command_packet command_packet;
+    double input_parameter = get_enrolled_fingerprint_count();
+    command_packet.setup_parameters_command_checksum(input_parameter, ((word) command_packet_data::EnrollStart));
+    command_packet.send();
+
+    if (debug) {
+        display << "\f" << "Start enrollment:" << "\n" << command_packet.calculate_checksum() << hwlib::flush;
+    }
+    return 0;
+}
+
+// @brief Terminate/close the fingerprint sensor
+int Fingerprintsensor::terminate() {
+    Fingerprintsensor::Command_packet command_packet;
+    command_packet.setup_parameters_command_checksum(0x00, ((word) command_packet_data::Close));
     command_packet.send();
 
     if (debug) {
         display << "\f" << "Terminate:" << "\n" << command_packet.calculate_checksum() << hwlib::flush;
-    } 
+    }
     return 0;
 }
