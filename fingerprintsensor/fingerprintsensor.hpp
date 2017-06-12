@@ -119,7 +119,17 @@ public:
     };
 
     // @brief Response packet for recieving commands, 12 bytes being recieved
-    class Response_packet {};
+    class Response_packet {
+    public:
+        const byte response_code1 = 0x55;
+        const byte response_code2 = 0xAA;
+        const word device_id = 0x00001;
+        double_word parameter;
+        word response;
+        word checksum;
+    public:
+        int recieve();
+    };
 
     // @brief Data packet for sending and recieving
     class Data_packet {};

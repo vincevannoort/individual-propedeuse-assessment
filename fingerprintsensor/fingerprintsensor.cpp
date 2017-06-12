@@ -10,7 +10,7 @@ Constructor & Deconstructor
 // @brief Constructor for Fingerprintsensor
 // @param hwlib::pin_out & tx, pin used for sending data/commands
 // @param hwlib::pin_in & rx, pin used for recieving data/commands
-Fingerprintsensor::Fingerprintsensor(hwlib::pin_out & tx, hwlib::pin_in & rx): tx(tx), rx(rx) { hwlib::wait_ms(200); }
+Fingerprintsensor::Fingerprintsensor(hwlib::pin_out & tx, hwlib::pin_in & rx): tx(tx), rx(rx) { hwlib::wait_ms(250); }
 
 // @brief Deconstructor for Fingerprintsensor, terminates when program ends
 Fingerprintsensor::~Fingerprintsensor(){ terminate(); }
@@ -85,6 +85,19 @@ void Fingerprintsensor::Command_packet::send() {
     hwlib::cout << "\n";
 }
 
+// @brief Recieve command which polls for a response, then acquires the needed data
+int Fingerprintsensor::Response_packet::recieve() {
+    auto rx_pin = hwlib::target::pin_in( hwlib::target::pins::d19 );
+    hwlib::cout << "\n" << "Polling response:";
+    while(true) {
+        if (hwlib::uart_getc_bit_banged_pin(rx_pin) == response_code1) {
+            hwlib::cout << "\n" << "Got response!";
+            break;
+        }
+    }
+    return 0;
+}
+
 /*
 Communication Commands functions
 */
@@ -92,8 +105,10 @@ Communication Commands functions
 // @brief Initialise the fingerprint sensor
 int Fingerprintsensor::initialise() {
     Fingerprintsensor::Command_packet command_packet;
-    command_packet.setup_parameters_command_checksum(0x00, ((word) command_packet_data::Open));
+    command_packet.setup_parameters_command_checksum(0x01, ((word) command_packet_data::Open));
     command_packet.send();
+    // Fingerprintsensor::Response_packet response_packet;
+    // response_packet.recieve();
 
     if (debug) {
         hwlib::cout << "Initialise: " << "checksum = " << hwlib::dec << command_packet.calculate_checksum() << "(DEC) " << hwlib::hex << command_packet.calculate_checksum() << "(HEX)";
