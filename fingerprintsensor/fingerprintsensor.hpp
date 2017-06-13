@@ -26,6 +26,7 @@ protected:
     */
     hwlib::pin_out & tx;
     hwlib::pin_in & rx;
+    int baud_rate = 9600;
     const bool debug = true;
 
 
@@ -115,7 +116,7 @@ public:
         void set_checksum(word input_checksum);
         word calculate_checksum();
         void setup_parameters_command_checksum(double_word input_parameter, word input_command);
-        void send();
+        void send(int input_baud_rate);
     };
 
     // @brief Response packet for recieving commands, 12 bytes being recieved
@@ -142,7 +143,7 @@ public:
     int recieve();
     int execute();
     int control_led(bool on);
-    int change_baud_rate();
+    int change_baud_rate(int baud_rate);
     int get_enrolled_fingerprint_count();
     int check_enrollment_status();
     int start_enrollment(int id);
