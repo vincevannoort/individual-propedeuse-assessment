@@ -10,7 +10,7 @@ Constructor & Deconstructor
 // @brief Constructor for Fingerprintsensor
 // @param hwlib::pin_out & tx, pin used for sending data/commands
 // @param hwlib::pin_in & rx, pin used for recieving data/commands
-Fingerprintsensor::Fingerprintsensor(hwlib::pin_out & tx, hwlib::pin_in & rx): tx(tx), rx(rx) { }
+Fingerprintsensor::Fingerprintsensor(hwlib::pin_out & tx, hwlib::pin_in & rx): tx(tx), rx(rx) { hwlib::wait_ms(200); }
 
 // @brief Deconstructor for Fingerprintsensor, terminates when program ends
 Fingerprintsensor::~Fingerprintsensor(){ /* terminate(); */ }
@@ -60,7 +60,10 @@ word Fingerprintsensor::Command_packet::calculate_checksum() {
 // @param int input_baud_rate, controls the speed of the protocol
 void Fingerprintsensor::Command_packet::send(int input_baud_rate) {
     auto tx_pin = hwlib::target::pin_out( hwlib::target::pins::d18 );
+    auto rx_pin = hwlib::target::pin_in( hwlib::target::pins::d19 );
+    auto led = hwlib::target::pin_out( hwlib::target::pins::d7 );
     byte packet[12];
+    byte r_packet[12];
     packet[0] = start_code1;
     packet[1] = start_code2;
     packet[2] = device_id & 0xFF;
@@ -74,13 +77,51 @@ void Fingerprintsensor::Command_packet::send(int input_baud_rate) {
     packet[10] = checksum & 0xFF;
     packet[11] = (checksum >> 8) & 0xFF;
 
-    // display << "\f" << "Before sending" << hwlib::flush; 
+    led.set(1);
     for (const byte & packet_byte : packet) {
         hwlib::uart_putc_bit_banged_pin_custom_baudrate(packet_byte, tx_pin, input_baud_rate);
     }
+    led.set(0);
 
-    // hwlib::cout << "Packet send - ";
-    // display << "\f" << "Packet send" << hwlib::flush;
+    /*
+    Debugging RESPONSE PACKET
+    */
+    // packet_byte = hwlib::uart_getc_bit_banged_pin(rx_pin);
+    for (byte & packet_byte : r_packet) {
+        char c = 0;        
+        const auto bit_cel = ( ( 1000L * 1000L ) / 9600 );
+
+        HWLIB_TRACE; // wait for start of startbit
+        led.set(1);
+        // while( rx_pin.get() ){}
+        while(1) {
+            byte retrieved_bit = rx_pin.get();
+            hwlib::cout << retrieved_bit;
+            if (retrieved_bit == 0) {
+                break;
+            }
+        }
+        led.set(0);
+
+        HWLIB_TRACE; // wait until halfway the first data bit 
+        led.set(1);
+        auto t = hwlib::now_us();
+        t += bit_cel + ( bit_cel / 2 );
+        while( hwlib::now_us() < t ){};
+        led.set(0);
+
+        HWLIB_TRACE; // 8 data bits
+        led.set(1);
+        for( uint_fast8_t i = 0; i < 8; ++i ) {
+            c = c >> 1;            
+            if( rx_pin.get() ){ c = c | 0x80; }
+            t+= bit_cel;
+            while( hwlib::now_us() < t ){};
+        }   
+        led.set(0);
+        packet_byte = c;
+    }
+    led.set(0);
 }
 
 // @brief Constructor for Response packet
@@ -91,14 +132,14 @@ Fingerprintsensor::Response_packet::Response_packet() {
 // @brief Recieve command which polls for a response, then acquires the needed data
 int Fingerprintsensor::Response_packet::recieve(int input_baud_rate) {
     auto rx_pin = hwlib::target::pin_in( hwlib::target::pins::d19 );
+    auto led = hwlib::target::pin_out( hwlib::target::pins::d7 );
     byte packet[1];
 
+    led.set(1);
     for (byte & packet_byte : packet) {
-        // display << "\f" << "Try recieving" << hwlib::flush;
         packet_byte = hwlib::uart_getc_bit_banged_pin(rx_pin);
-        // display << "\f" << "Answered" << hwlib::flush;
     }
-    display << "\f" << "After recieving" << hwlib::flush; 
+    led.set(0);
 
     return 0;
 }
@@ -110,7 +151,7 @@ Communication Commands functions
 // @brief Initialise the fingerprint sensor
 int Fingerprintsensor::initialise() {
     Fingerprintsensor::Command_packet command_packet(0x00, ((word) command_packet_data::Open));
-    Fingerprintsensor::Response_packet response_packet;
+    // Fingerprintsensor::Response_packet response_packet;
 
     if (debug) {
         hwlib::cout << "Initialise" << "\n";
@@ -122,7 +163,6 @@ int Fingerprintsensor::initialise() {
 // @brief Control the led
 // @param bool on, true for turning the led on and false for turning it off
 int Fingerprintsensor::control_led(bool on) {
-    HWLIB_TRACE;
     double input_parameter;
     if (on) { input_parameter = 0x01; } 
     else {  input_parameter = 0x00; }
