@@ -27,7 +27,7 @@ protected:
     hwlib::pin_out & tx;
     hwlib::pin_in & rx;
     int baud_rate = 9600;
-    const bool debug = true;
+    const bool debug = false;
 
 
     /*
@@ -110,13 +110,23 @@ public:
         word checksum;
 
     public:
-        Command_packet();
+        Command_packet(double_word input_parameter, word input_command);
         void set_parameter(double_word input_parameter);
         void set_command(word input_command);
         void set_checksum(word input_checksum);
         word calculate_checksum();
-        void setup_parameters_command_checksum(double_word input_parameter, word input_command);
         void send(int input_baud_rate);
+
+        /*
+        Debugging OLED
+        */
+        hwlib::target::pin_oc scl                 = hwlib::target::pin_oc( hwlib::target::pins::scl );
+        hwlib::target::pin_oc sda                 = hwlib::target::pin_oc( hwlib::target::pins::sda );
+        hwlib::i2c_bus_bit_banged_scl_sda i2c_bus = hwlib::i2c_bus_bit_banged_scl_sda( scl, sda );
+        hwlib::glcd_oled oled                     = hwlib::glcd_oled( i2c_bus, 0x3c ); 
+
+        hwlib::font_default_8x8 font              = hwlib::font_default_8x8();
+        hwlib::window_ostream display             = hwlib::window_ostream( oled, font );
     };
 
     // @brief Response packet for recieving commands, 12 bytes being recieved
@@ -130,18 +140,19 @@ public:
         word checksum;
         
     public:
+        Response_packet();
         int recieve(int input_baud_rate);
 
-     /*
-    Debugging OLED
-    */
-    hwlib::target::pin_oc scl                 = hwlib::target::pin_oc( hwlib::target::pins::scl );
-    hwlib::target::pin_oc sda                 = hwlib::target::pin_oc( hwlib::target::pins::sda );
-    hwlib::i2c_bus_bit_banged_scl_sda i2c_bus = hwlib::i2c_bus_bit_banged_scl_sda( scl, sda );
-    hwlib::glcd_oled oled                     = hwlib::glcd_oled( i2c_bus, 0x3c ); 
+        /*
+        Debugging OLED
+        */
+        hwlib::target::pin_oc scl                 = hwlib::target::pin_oc( hwlib::target::pins::scl );
+        hwlib::target::pin_oc sda                 = hwlib::target::pin_oc( hwlib::target::pins::sda );
+        hwlib::i2c_bus_bit_banged_scl_sda i2c_bus = hwlib::i2c_bus_bit_banged_scl_sda( scl, sda );
+        hwlib::glcd_oled oled                     = hwlib::glcd_oled( i2c_bus, 0x3c ); 
 
-    hwlib::font_default_8x8 font              = hwlib::font_default_8x8();
-    hwlib::window_ostream display             = hwlib::window_ostream( oled, font );
+        hwlib::font_default_8x8 font              = hwlib::font_default_8x8();
+        hwlib::window_ostream display             = hwlib::window_ostream( oled, font );
     };
 
     // @brief Data packet for sending and recieving
@@ -157,7 +168,7 @@ public:
     int control_led(bool on);
     int change_baud_rate(int baud_rate);
     int get_enrolled_fingerprint_count();
-    int check_enrollment_status();
+    int check_enrollment_status(int id);
     int start_enrollment(int id);
     int enrollment(int template_number);
     int check_finger_pressing_status();
