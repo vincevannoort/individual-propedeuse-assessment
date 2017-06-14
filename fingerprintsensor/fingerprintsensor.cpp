@@ -78,20 +78,27 @@ void Fingerprintsensor::Command_packet::send(int input_baud_rate) {
     packet[10] = checksum & 0xFF;
     packet[11] = (checksum >> 8) & 0xFF;
 
-    hwlib::cout << "\n\n";
     for (const byte & packet_byte : packet) {
-        // hwlib::uart_putc_bit_banged_pin(packet_byte, tx_pin);
         hwlib::uart_putc_bit_banged_pin_custom_baudrate(packet_byte, tx_pin, input_baud_rate);
-        hwlib::cout << hwlib::hex << hwlib::setw(2) << hwlib::setfill('0') << (int) packet_byte << "-";
     }
-    hwlib::cout << "\n";
+
+    if (debug) {
+        hwlib::cout << "Packet send: ";
+        display << "\f" << "Packet send" << hwlib::flush;
+    } 
 }
 
 // @brief Recieve command which polls for a response, then acquires the needed data
-int Fingerprintsensor::Response_packet::recieve() {
+int Fingerprintsensor::Response_packet::recieve(int input_baud_rate) {
     auto rx_pin = hwlib::target::pin_in( hwlib::target::pins::d19 );
-    hwlib::cout << "\n" << "Polling response:";
-    hwlib::cout << hwlib::uart_getc_bit_banged_pin(rx_pin);
+    byte packet[12];
+
+    for (byte & packet_byte : packet) {
+        display << "\f" << "Try recieving" << hwlib::flush;
+        packet_byte = hwlib::uart_getc_bit_banged_pin_custom_baudrate(rx_pin, input_baud_rate);
+        display << "\f" << "Answered" << hwlib::flush;
+    } 
+
     return 0;
 }
 
@@ -102,14 +109,15 @@ Communication Commands functions
 // @brief Initialise the fingerprint sensor
 int Fingerprintsensor::initialise() {
     Fingerprintsensor::Command_packet command_packet;
-    command_packet.setup_parameters_command_checksum(0x01, ((word) command_packet_data::Open));
+    command_packet.setup_parameters_command_checksum(0x00, ((word) command_packet_data::Open));
     command_packet.send(baud_rate);
 
-    // Fingerprintsensor::Response_packet response_packet;
-    // response_packet.recieve();
+    Fingerprintsensor::Response_packet response_packet;
+    response_packet.recieve(baud_rate);
 
     if (debug) {
         hwlib::cout << "Initialise: " << "checksum = " << command_packet.calculate_checksum();
+        display << "\f" << "Initialise" << hwlib::flush;
     } 
     return 0;
 }
@@ -126,6 +134,7 @@ int Fingerprintsensor::control_led(bool on) {
 
     if (debug) {
         hwlib::cout << "Control led: " << "checksum = " << command_packet.calculate_checksum();
+        display << "\f" << "Control led" << hwlib::flush;
     } 
     return 0;
 }
@@ -140,6 +149,7 @@ int Fingerprintsensor::change_baud_rate(int input_baud_rate) {
 
     if (debug) {
         hwlib::cout << "Baud rate: " << baud_rate << " checksum = " << command_packet.calculate_checksum();
+        display << "\f" << "Baud rate" << hwlib::flush;
     }
     return 0;
 }
@@ -153,8 +163,22 @@ int Fingerprintsensor::get_enrolled_fingerprint_count() {
 
     if (debug) {
         hwlib::cout << "Get count: " << "checksum = " << command_packet.calculate_checksum();
+        display << "\f" << "Get count" << hwlib::flush;
     } 
     return count;
+}
+
+// @brief Check status of fingerprint id
+// @param int id, value between 0 - 19
+int Fingerprintsensor::check_enrollment_status(int id) {
+    Fingerprintsensor::Command_packet command_packet;
+    command_packet.setup_parameters_command_checksum(id, ((word) command_packet_data::EnrollStart));
+    command_packet.send(baud_rate);
+
+    if (debug) {
+        hwlib::cout << "Check status: " << "checksum = " << command_packet.calculate_checksum();
+        display << "\f" << "Check status" << hwlib::flush;
+    }
 }
 
 // @brief Start a fingerprint enrollment
@@ -167,6 +191,7 @@ int Fingerprintsensor::start_enrollment(int id) {
 
     if (debug) {
         hwlib::cout << "Start enrollment: " << "checksum = " << command_packet.calculate_checksum();
+        display << "\f" << "Start enrollment" << hwlib::flush;
     }
     return 0;
 }
@@ -188,6 +213,7 @@ int Fingerprintsensor::enrollment(int template_number) {
 
     if (debug) {
         hwlib::cout << "Enrollment: " << "checksum = " << command_packet.calculate_checksum();
+        display << "\f" << "Enrollment" << hwlib::flush;
     }
     return 0;
 }
@@ -207,6 +233,7 @@ int Fingerprintsensor::capture_fingerprint(char quality[]) {
 
     if (debug) {
         hwlib::cout << "Capture: " << "checksum = " << command_packet.calculate_checksum();
+        display << "\f" << "Capture" << hwlib::flush;
     }
     return 0;
 }
@@ -219,6 +246,7 @@ int Fingerprintsensor::terminate() {
 
     if (debug) {
         hwlib::cout << "Terminate: " << "checksum = " << command_packet.calculate_checksum();
+        display << "\f" << "Terminate" << hwlib::flush;
     }
     return 0;
 }

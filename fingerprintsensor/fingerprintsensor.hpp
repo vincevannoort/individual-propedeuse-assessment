@@ -128,8 +128,20 @@ public:
         double_word parameter;
         word response;
         word checksum;
+        
     public:
-        int recieve();
+        int recieve(int input_baud_rate);
+
+     /*
+    Debugging OLED
+    */
+    hwlib::target::pin_oc scl                 = hwlib::target::pin_oc( hwlib::target::pins::scl );
+    hwlib::target::pin_oc sda                 = hwlib::target::pin_oc( hwlib::target::pins::sda );
+    hwlib::i2c_bus_bit_banged_scl_sda i2c_bus = hwlib::i2c_bus_bit_banged_scl_sda( scl, sda );
+    hwlib::glcd_oled oled                     = hwlib::glcd_oled( i2c_bus, 0x3c ); 
+
+    hwlib::font_default_8x8 font              = hwlib::font_default_8x8();
+    hwlib::window_ostream display             = hwlib::window_ostream( oled, font );
     };
 
     // @brief Data packet for sending and recieving
