@@ -12,7 +12,7 @@
 SOURCES := fingerprintsensor/fingerprintsensor.cpp
 
 # header files in this project
-HEADERS := fingerprintsensor/fingerprintsensor.hpp
+HEADERS := fingerprintsensor/fingerprintsensor.hpp fingerprintsensor/unit_tests.hpp
 
 # other places to look for files for this project
 SEARCH  := 
