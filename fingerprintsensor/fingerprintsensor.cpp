@@ -63,7 +63,7 @@ void Fingerprintsensor::Command_packet::send(int input_baud_rate) {
     auto rx_pin = hwlib::target::pin_in( hwlib::target::pins::d19 );
     auto led = hwlib::target::pin_out( hwlib::target::pins::d3 );
     byte packet[12];
-    byte r_packet[12];
+    // byte r_packet[12];
     packet[0] = start_code1;
     packet[1] = start_code2;
     packet[2] = device_id & 0xFF;
@@ -79,20 +79,47 @@ void Fingerprintsensor::Command_packet::send(int input_baud_rate) {
 
     led.set(1);
     for (const byte & packet_byte : packet) {
-        hwlib::uart_putc_bit_banged_pin_custom_baudrate(packet_byte, tx_pin, input_baud_rate);
+        // hwlib::uart_putc_bit_banged_pin_custom_baudrate(packet_byte, tx_pin, input_baud_rate);
+        // USED FOR FUNCTIONS
+        char c = packet_byte;
+        auto pin = tx_pin;
+        int baudrate = input_baud_rate;
+        // =======================
+
+        const auto bit_cel = ( ( 1000L * 1000L ) / baudrate );
+        pin.set( 1 );
+        hwlib::wait_us( bit_cel );
+
+        // start bit
+        pin.set( 0 );
+        hwlib::wait_us( bit_cel );
+        hwlib::cout << "done with start bit. \n";
+
+        // 8 data bits
+        for( uint_fast8_t i = 0; i < 8; ++i ){
+         pin.set( ( c & 0x01 ) != 0x00 );
+         c = c >> 1;
+         hwlib::wait_us( bit_cel );
+        }
+        hwlib::cout << "done with sending 8 data bits. \n";
+
+        // 2 stop bits
+        pin.set( 1 );
+        hwlib::wait_us( 2 * bit_cel );
+        hwlib::cout << "done with 2 stop bits. \n";
     }
     led.set(0);
 
     /*
     Debugging RESPONSE PACKET
     */
-    // packet_byte = hwlib::uart_getc_bit_banged_pin(rx_pin);
     for (byte & packet_byte : r_packet) {
+        // packet_byte = hwlib::uart_getc_bit_banged_pin(rx_pin);
         char c = 0;        
         const auto bit_cel = ( ( 1000L * 1000L ) / 9600 );
 
         led.set(1);
-        while( rx_pin.get() ){}
+        while( rx_pin.get() ){} // WACHT TOT DE PIN EENMAAL 0 WORDT, START UART PROTOCOL 
         led.set(0);
         hwlib::cout << "recieved start bit. \n";
 
@@ -116,7 +143,6 @@ void Fingerprintsensor::Command_packet::send(int input_baud_rate) {
         packet_byte = c;
         hwlib::cout << "\n";
     }
-    led.set(0);
 }
 
 // @brief Constructor for Response packet
