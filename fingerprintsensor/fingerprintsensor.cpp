@@ -10,7 +10,7 @@ Constructor & Deconstructor
 // @brief Constructor for Fingerprintsensor
 // @param hwlib::pin_out & tx, pin used for sending data/commands
 // @param hwlib::pin_in & rx, pin used for recieving data/commands
-Fingerprintsensor::Fingerprintsensor(hwlib::pin_out & tx, hwlib::pin_in & rx): tx(tx), rx(rx) { hwlib::wait_ms(200); }
+Fingerprintsensor::Fingerprintsensor(hwlib::pin_out & tx, hwlib::pin_in & rx, hwlib::pin_out & power): tx(tx), rx(rx), power(power) { hwlib::wait_ms(200); }
 
 // @brief Deconstructor for Fingerprintsensor, terminates when program ends
 Fingerprintsensor::~Fingerprintsensor(){ /* terminate(); */ }
@@ -61,9 +61,9 @@ word Fingerprintsensor::Command_packet::calculate_checksum() {
 void Fingerprintsensor::Command_packet::send(int input_baud_rate) {
     auto tx_pin = hwlib::target::pin_out( hwlib::target::pins::d18 );
     auto rx_pin = hwlib::target::pin_in( hwlib::target::pins::d19 );
-    auto led = hwlib::target::pin_out( hwlib::target::pins::d7 );
+    auto led = hwlib::target::pin_out( hwlib::target::pins::d3 );
     byte packet[12];
-    // byte r_packet[12];
+    byte r_packet[12];
     packet[0] = start_code1;
     packet[1] = start_code2;
     packet[2] = device_id & 0xFF;
@@ -86,32 +86,23 @@ void Fingerprintsensor::Command_packet::send(int input_baud_rate) {
     /*
     Debugging RESPONSE PACKET
     */
-    /*
     // packet_byte = hwlib::uart_getc_bit_banged_pin(rx_pin);
     for (byte & packet_byte : r_packet) {
         char c = 0;        
         const auto bit_cel = ( ( 1000L * 1000L ) / 9600 );
 
-        HWLIB_TRACE; // wait for start of startbit
         led.set(1);
-        // while( rx_pin.get() ){}
-        while(1) {
-            byte retrieved_bit = rx_pin.get();
-            hwlib::cout << retrieved_bit;
-            if (retrieved_bit == 0) {
-                break;
-            }
-        }
+        while( rx_pin.get() ){}
         led.set(0);
+        hwlib::cout << "recieved start bit. \n";
 
-        HWLIB_TRACE; // wait until halfway the first data bit 
         led.set(1);
         auto t = hwlib::now_us();
         t += bit_cel + ( bit_cel / 2 );
         while( hwlib::now_us() < t ){};
         led.set(0);
+        hwlib::cout << "Waited until halfway the first data bit. \n";
 
-        HWLIB_TRACE; // 8 data bits
         led.set(1);
         for( uint_fast8_t i = 0; i < 8; ++i ) {
             c = c >> 1;            
@@ -120,10 +111,12 @@ void Fingerprintsensor::Command_packet::send(int input_baud_rate) {
             while( hwlib::now_us() < t ){};
         }   
         led.set(0);
+        hwlib::cout << "Recieved 8 data bits. \n";
+
         packet_byte = c;
+        hwlib::cout << "\n";
     }
     led.set(0);
-    */
 }
 
 // @brief Constructor for Response packet
@@ -134,7 +127,7 @@ Fingerprintsensor::Response_packet::Response_packet() {
 // @brief Recieve command which polls for a response, then acquires the needed data
 int Fingerprintsensor::Response_packet::recieve(int input_baud_rate) {
     auto rx_pin = hwlib::target::pin_in( hwlib::target::pins::d19 );
-    auto led = hwlib::target::pin_out( hwlib::target::pins::d7 );
+    auto led = hwlib::target::pin_out( hwlib::target::pins::d3 );
     byte packet[12];
 
     for (byte & packet_byte : packet) {
