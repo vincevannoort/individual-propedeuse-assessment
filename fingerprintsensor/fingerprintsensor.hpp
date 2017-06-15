@@ -132,12 +132,12 @@ public:
     // @brief Response packet for recieving commands, 12 bytes being recieved
     class Response_packet {
     public:
-        const byte response_code1 = 0x55;
-        const byte response_code2 = 0xAA;
-        const word device_id = 0x00001;
-        double_word parameter;
-        word response;
-        word checksum;
+        // const byte response_code1 = 0x55;
+        // const byte response_code2 = 0xAA;
+        // const word device_id = 0x00001;
+        // double_word parameter;
+        // word response;
+        // word checksum;
         
     public:
         Response_packet();
@@ -172,13 +172,13 @@ public:
     int start_enrollment(int id);
     int enrollment(int template_number);
     int check_finger_pressing_status();
-    int delete_one_fingerprint();
+    int delete_one_fingerprint(int id);
     int delete_all_fingerprints();
-    int verification_1_1();
-    int indentification_1_N();
+    int verification_1_1(int id);
+    int identification_1_N();
     int capture_fingerprint(char quality[]);
     int make_template();
-    int set_security_level();
+    int set_security_level(int level);
     int get_security_level();
     int terminate();
 

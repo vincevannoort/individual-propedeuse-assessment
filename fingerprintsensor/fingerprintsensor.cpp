@@ -63,7 +63,7 @@ void Fingerprintsensor::Command_packet::send(int input_baud_rate) {
     auto rx_pin = hwlib::target::pin_in( hwlib::target::pins::d19 );
     auto led = hwlib::target::pin_out( hwlib::target::pins::d7 );
     byte packet[12];
-    byte r_packet[12];
+    // byte r_packet[12];
     packet[0] = start_code1;
     packet[1] = start_code2;
     packet[2] = device_id & 0xFF;
@@ -86,6 +86,7 @@ void Fingerprintsensor::Command_packet::send(int input_baud_rate) {
     /*
     Debugging RESPONSE PACKET
     */
+    /*
     // packet_byte = hwlib::uart_getc_bit_banged_pin(rx_pin);
     for (byte & packet_byte : r_packet) {
         char c = 0;        
@@ -122,6 +123,7 @@ void Fingerprintsensor::Command_packet::send(int input_baud_rate) {
         packet_byte = c;
     }
     led.set(0);
+    */
 }
 
 // @brief Constructor for Response packet
@@ -133,13 +135,11 @@ Fingerprintsensor::Response_packet::Response_packet() {
 int Fingerprintsensor::Response_packet::recieve(int input_baud_rate) {
     auto rx_pin = hwlib::target::pin_in( hwlib::target::pins::d19 );
     auto led = hwlib::target::pin_out( hwlib::target::pins::d7 );
-    byte packet[1];
+    byte packet[12];
 
-    led.set(1);
     for (byte & packet_byte : packet) {
         packet_byte = hwlib::uart_getc_bit_banged_pin(rx_pin);
     }
-    led.set(0);
 
     return 0;
 }
@@ -240,6 +240,64 @@ int Fingerprintsensor::enrollment(int template_number) {
     if (debug) {
         hwlib::cout << "Enrollment" << "\n";
         display << "\f" << "Enrollment" << hwlib::flush;
+    }
+    return 0;
+}
+
+// @brief Check if a finger sits on the fingerprintsensor
+int Fingerprintsensor::check_finger_pressing_status() {
+    Fingerprintsensor::Command_packet command_packet(0x00, ((word) command_packet_data::IsPressFinger));
+
+    if (debug) {
+        hwlib::cout << "Check fingerpress" << "\n";
+        display << "\f" << "Check fingerpress" << hwlib::flush;
+    }
+    return 0;
+}
+
+// @brief Delete one fingerprint based on a id
+// @param int id, id to delete from the fingerprintsensor
+int Fingerprintsensor::delete_one_fingerprint(int id) {
+    Fingerprintsensor::Command_packet command_packet(id, ((word) command_packet_data::DeleteID));
+
+    if (debug) {
+        hwlib::cout << "Delete one fingerprint" << "\n";
+        display << "\f" << "Delete one fingerprint" << hwlib::flush;
+    }
+    return 0;
+}
+
+// @brief Delete one fingerprint based on a id
+// @param int id, id to delete from the fingerprintsensor
+int Fingerprintsensor::delete_all_fingerprints() {
+    Fingerprintsensor::Command_packet command_packet(0x00, ((word) command_packet_data::DeleteAll));
+
+    if (debug) {
+        hwlib::cout << "Delete all fingerprints" << "\n";
+        display << "\f" << "Delete all fingerprints" << hwlib::flush;
+    }
+    return 0;
+}
+
+// @brief Verify a fingerprint based on id
+// @param int id, id to verify a fingerprint with
+int Fingerprintsensor::verification_1_1(int id) {
+    Fingerprintsensor::Command_packet command_packet(id, ((word) command_packet_data::Verify1_1));
+
+    if (debug) {
+        hwlib::cout << "Verification 1:1" << "\n";
+        display << "\f" << "Verification 1:1" << hwlib::flush;
+    }
+    return 0;
+}
+
+// @brief Verify a fingerprint on all existing fingerprints
+int Fingerprintsensor::identification_1_N() {
+    Fingerprintsensor::Command_packet command_packet(0x00, ((word) command_packet_data::Identify1_N));
+
+    if (debug) {
+        hwlib::cout << "Verification 1:N" << "\n";
+        display << "\f" << "Verification 1:N" << hwlib::flush;
     }
     return 0;
 }

@@ -8,6 +8,6 @@ int main() {
 	auto rx_pin = hwlib::target::pin_in( hwlib::target::pins::d19 );
     Fingerprintsensor fingerprintsensor(tx_pin, rx_pin);
     fingerprintsensor.initialise();
-    // fingerprintsensor.control_led(true);
-    // fingerprintsensor.control_led(false);
+    fingerprintsensor.control_led(true);
+    fingerprintsensor.control_led(false);
 }
