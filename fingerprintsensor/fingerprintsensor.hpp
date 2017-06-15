@@ -17,7 +17,8 @@ public:
     /*
     Constructor
     */
-    Fingerprintsensor(hwlib::pin_out & tx, hwlib::pin_in & rx, hwlib::pin_out & power);
+    Fingerprintsensor();
+    Fingerprintsensor(hwlib::pin_out & tx, hwlib::pin_in & rx);
     ~Fingerprintsensor();
 
 protected:
@@ -26,7 +27,6 @@ protected:
     */
     hwlib::pin_out & tx;
     hwlib::pin_in & rx;
-    hwlib::pin_out & power;
     int baud_rate = 9600;
     const bool debug = false;
 
