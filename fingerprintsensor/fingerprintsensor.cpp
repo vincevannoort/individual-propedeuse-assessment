@@ -1,4 +1,5 @@
 #include "fingerprintsensor.hpp"
+#include "unit_tests.hpp"
 
 #include <cstring>
 #include "hwlib.hpp"
@@ -65,8 +66,6 @@ void Fingerprintsensor::Command_packet::send(int input_baud_rate) {
     auto tx_pin = hwlib::target::pin_out( hwlib::target::pins::d18 );
     auto rx_pin = hwlib::target::pin_in( hwlib::target::pins::d19 );
     auto led = hwlib::target::pin_out( hwlib::target::pins::d3 );
-    byte packet[12];
-    byte r_packet[12];
     packet[0] = start_code1;
     packet[1] = start_code2;
     packet[2] = device_id & 0xFF;
@@ -112,37 +111,37 @@ void Fingerprintsensor::Command_packet::send(int input_baud_rate) {
     /*
     Debugging RESPONSE PACKET
     */
-    for (byte & packet_byte : r_packet) {
-        // packet_byte = hwlib::uart_getc_bit_banged_pin(rx_pin);
-        // code from HWLIB
-        char c = 0;        
-        const auto bit_cel = ( ( 1000L * 1000L ) / 9600 );
+    // for (byte & packet_byte : r_packet) {
+    //     // packet_byte = hwlib::uart_getc_bit_banged_pin(rx_pin);
+    //     // code from HWLIB
+    //     char c = 0;        
+    //     const auto bit_cel = ( ( 1000L * 1000L ) / 9600 );
 
-        // wait for start of startbit
-        led.set(1);
-        while( rx_pin.get() ){} // WACHT TOT DE PIN EENMAAL 0 WORDT, START UART PROTOCOL 
-        led.set(0);
+    //     // wait for start of startbit
+    //     led.set(1);
+    //     while( rx_pin.get() ){} // WACHT TOT DE PIN EENMAAL 0 WORDT, START UART PROTOCOL 
+    //     led.set(0);
 
-        // wait until halfway the first data bit
-        led.set(1);
-        auto t = hwlib::now_us();
-        t += bit_cel + ( bit_cel / 2 );
-        while( hwlib::now_us() < t ){};
-        led.set(0);
+    //     // wait until halfway the first data bit
+    //     led.set(1);
+    //     auto t = hwlib::now_us();
+    //     t += bit_cel + ( bit_cel / 2 );
+    //     while( hwlib::now_us() < t ){};
+    //     led.set(0);
 
-        // 8 data bits
-        led.set(1);
-        for( uint_fast8_t i = 0; i < 8; ++i ) {
-            c = c >> 1;            
-            if( rx_pin.get() ){ c = c | 0x80; }
-            t+= bit_cel;
-            while( hwlib::now_us() < t ){};
-        }   
-        led.set(0);
+    //     // 8 data bits
+    //     led.set(1);
+    //     for( uint_fast8_t i = 0; i < 8; ++i ) {
+    //         c = c >> 1;            
+    //         if( rx_pin.get() ){ c = c | 0x80; }
+    //         t+= bit_cel;
+    //         while( hwlib::now_us() < t ){};
+    //     }   
+    //     led.set(0);
 
-        packet_byte = c;
-        hwlib::cout << "\n";
-    }
+    //     packet_byte = c;
+    //     hwlib::cout << "\n";
+    // }
 }
 
 // @brief Constructor for Response packet
@@ -174,6 +173,7 @@ int Fingerprintsensor::initialise() {
 
     if (debug) {
         hwlib::cout << "Initialise" << "\n";
+        hwlib::cout << TEST_check_initialise_command_packet(command_packet.packet) << "\n";
     } 
     return 0;
 }
@@ -332,6 +332,24 @@ int Fingerprintsensor::terminate() {
 
     if (debug) {
         hwlib::cout << "Terminate" << "\n";
+    }
+    return 0;
+}
+
+// @brief Register a fingerprint according to the steps to take in the datasheet
+int Fingerprintsensor::register_fingerprint() {
+    start_enrollment();
+    capture_fingerprint("best");
+    enrollment(1);
+    check_finger_pressing_status();
+    capture_fingerprint("best");
+    enrollment(2);
+    check_finger_pressing_status();
+    capture_fingerprint("best");
+    enrollment(3);
+
+    if (debug) {
+        hwlib::cout << "Registered fingerprint" << "\n";
     }
     return 0;
 }

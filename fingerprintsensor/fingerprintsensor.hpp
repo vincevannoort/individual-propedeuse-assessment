@@ -102,6 +102,10 @@ public:
 
     // @brief Command packet for sending commands, which consists of 12 bytes
     class Command_packet {
+    public:
+        byte packet[12];
+        byte r_packet[12]; // TEMPORARY
+
     protected:
         const byte start_code1 = 0x55;
         const byte start_code2 = 0xAA;
@@ -138,7 +142,7 @@ public:
     class Data_packet {};
 
     /*
-    Functions
+    Commando functions
     */
     int initialise();
     int send();
@@ -156,21 +160,12 @@ public:
     int verification_1_1(int id);
     int identification_1_N();
     int capture_fingerprint(char quality[]);
-    int make_template();
-    int set_security_level(int level);
-    int get_security_level();
     int terminate();
 
     /*
-    Debugging OLED
+    Control functions
     */
-    hwlib::target::pin_oc scl                 = hwlib::target::pin_oc( hwlib::target::pins::scl );
-    hwlib::target::pin_oc sda                 = hwlib::target::pin_oc( hwlib::target::pins::sda );
-    hwlib::i2c_bus_bit_banged_scl_sda i2c_bus = hwlib::i2c_bus_bit_banged_scl_sda( scl, sda );
-    hwlib::glcd_oled oled                     = hwlib::glcd_oled( i2c_bus, 0x3c ); 
-
-    hwlib::font_default_8x8 font              = hwlib::font_default_8x8();
-    hwlib::window_ostream display             = hwlib::window_ostream( oled, font );
+    int register_fingerprint();
 };
 
 #endif
