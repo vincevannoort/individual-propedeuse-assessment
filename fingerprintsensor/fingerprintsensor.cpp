@@ -83,6 +83,7 @@ void Fingerprintsensor::Command_packet::send(int input_baud_rate) {
     led.set(1);
     for (const byte & packet_byte : packet) {
         // hwlib::uart_putc_bit_banged_pin_custom_baudrate(packet_byte, tx_pin, input_baud_rate);
+        // code from HWLIB
         char c = packet_byte;
         auto pin = tx_pin;
         int baudrate = input_baud_rate;
@@ -113,6 +114,7 @@ void Fingerprintsensor::Command_packet::send(int input_baud_rate) {
     */
     for (byte & packet_byte : r_packet) {
         // packet_byte = hwlib::uart_getc_bit_banged_pin(rx_pin);
+        // code from HWLIB
         char c = 0;        
         const auto bit_cel = ( ( 1000L * 1000L ) / 9600 );
 
@@ -172,7 +174,6 @@ int Fingerprintsensor::initialise() {
 
     if (debug) {
         hwlib::cout << "Initialise" << "\n";
-        display << "\f" << "Initialise" << hwlib::flush;
     } 
     return 0;
 }
@@ -187,7 +188,6 @@ int Fingerprintsensor::control_led(bool on) {
 
     if (debug) {
         hwlib::cout << "Control led" << "\n";
-        display << "\f" << "Control led" << hwlib::flush;
     } 
     return 0;
 }
@@ -200,7 +200,6 @@ int Fingerprintsensor::change_baud_rate(int input_baud_rate) {
 
     if (debug) {
         hwlib::cout << "Baud rate: " << baud_rate << " checksum = " << command_packet.calculate_checksum();
-        display << "\f" << "Baud rate" << hwlib::flush;
     }
     return 0;
 }
@@ -211,7 +210,6 @@ int Fingerprintsensor::get_enrolled_fingerprint_count() {
 
     if (debug) {
         hwlib::cout << "Get count" << "\n";
-        display << "\f" << "Get count" << hwlib::flush;
     } 
     return 0;
 }
@@ -223,7 +221,6 @@ int Fingerprintsensor::check_enrollment_status(int id) {
 
     if (debug) {
         hwlib::cout << "Check status" << "\n";
-        display << "\f" << "Check status" << hwlib::flush;
     }
     return 0;
 }
@@ -236,7 +233,6 @@ int Fingerprintsensor::start_enrollment(int id) {
 
     if (debug) {
         hwlib::cout << "Start enrollment" << "\n";
-        display << "\f" << "Start enrollment" << hwlib::flush;
     }
     return 0;
 }
@@ -256,7 +252,6 @@ int Fingerprintsensor::enrollment(int template_number) {
 
     if (debug) {
         hwlib::cout << "Enrollment" << "\n";
-        display << "\f" << "Enrollment" << hwlib::flush;
     }
     return 0;
 }
@@ -267,7 +262,6 @@ int Fingerprintsensor::check_finger_pressing_status() {
 
     if (debug) {
         hwlib::cout << "Check fingerpress" << "\n";
-        display << "\f" << "Check fingerpress" << hwlib::flush;
     }
     return 0;
 }
@@ -279,7 +273,6 @@ int Fingerprintsensor::delete_one_fingerprint(int id) {
 
     if (debug) {
         hwlib::cout << "Delete one fingerprint" << "\n";
-        display << "\f" << "Delete one fingerprint" << hwlib::flush;
     }
     return 0;
 }
@@ -291,7 +284,6 @@ int Fingerprintsensor::delete_all_fingerprints() {
 
     if (debug) {
         hwlib::cout << "Delete all fingerprints" << "\n";
-        display << "\f" << "Delete all fingerprints" << hwlib::flush;
     }
     return 0;
 }
@@ -303,7 +295,6 @@ int Fingerprintsensor::verification_1_1(int id) {
 
     if (debug) {
         hwlib::cout << "Verification 1:1" << "\n";
-        display << "\f" << "Verification 1:1" << hwlib::flush;
     }
     return 0;
 }
@@ -314,7 +305,6 @@ int Fingerprintsensor::identification_1_N() {
 
     if (debug) {
         hwlib::cout << "Verification 1:N" << "\n";
-        display << "\f" << "Verification 1:N" << hwlib::flush;
     }
     return 0;
 }
@@ -332,7 +322,6 @@ int Fingerprintsensor::capture_fingerprint(char quality[]) {
 
     if (debug) {
         hwlib::cout << "Capture" << "\n";
-        display << "\f" << "Capture" << hwlib::flush;
     }
     return 0;
 }
@@ -343,7 +332,6 @@ int Fingerprintsensor::terminate() {
 
     if (debug) {
         hwlib::cout << "Terminate" << "\n";
-        display << "\f" << "Terminate" << hwlib::flush;
     }
     return 0;
 }
