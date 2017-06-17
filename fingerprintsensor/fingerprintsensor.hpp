@@ -104,7 +104,7 @@ public:
     class Command_packet {
     public:
         byte packet[12];
-        byte r_packet[12]; // TEMPORARY
+        // byte r_packet[12]; // TEMPORARY
 
     protected:
         const byte start_code1 = 0x55;
@@ -126,12 +126,14 @@ public:
     // @brief Response packet for recieving commands, 12 bytes being recieved
     class Response_packet {
     public:
-        // const byte response_code1 = 0x55;
-        // const byte response_code2 = 0xAA;
-        // const word device_id = 0x00001;
-        // double_word parameter;
-        // word response;
-        // word checksum;
+        byte packet[12];
+    protected:
+        const byte response_code1 = 0x55;
+        const byte response_code2 = 0xAA;
+        const word device_id = 0x00001;
+        double_word parameter;
+        word response;
+        word checksum;
         
     public:
         Response_packet();
@@ -152,14 +154,14 @@ public:
     int change_baud_rate(int baud_rate);
     int get_enrolled_fingerprint_count();
     int check_enrollment_status(int id);
-    int start_enrollment(int id);
+    int start_enrollment();
     int enrollment(int template_number);
     int check_finger_pressing_status();
     int delete_one_fingerprint(int id);
     int delete_all_fingerprints();
     int verification_1_1(int id);
     int identification_1_N();
-    int capture_fingerprint(char quality[]);
+    int capture_fingerprint(const char* input);
     int terminate();
 
     /*
