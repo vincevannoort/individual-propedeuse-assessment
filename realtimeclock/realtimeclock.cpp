@@ -40,11 +40,11 @@ class SPISession {
   ce_pin_(ce_pin), io_pin_(io_pin), sclk_pin_(sclk_pin) {
     sclk_pin_.set(0); // digitalWrite(sclk_pin_, LOW);
     ce_pin_.set(1); // digitalWrite(ce_pin_, HIGH);
-    hwlib::wait_us(4); // delayMicroseconds(4);  // tCC
+    hwlib::wait_us( 4 ); // delayMicroseconds(4);  // tCC
   }
   ~SPISession() {
     ce_pin_.set(0); // digitalWrite(ce_pin_, LOW);
-    hwlib::wait_us(4); // delayMicroseconds(4);  // tCWH
+    hwlib::wait_us( 4 ); // delayMicroseconds(4);  // tCWH
   }
 
  private:
@@ -99,31 +99,21 @@ ce_pin_(ce_pin), io_pin_(io_pin), sclk_pin_(sclk_pin) {
 }
 
 // void shiftOut(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder, uint8_t val)
-void shiftOut(hwlib::pin_out & dataPin, hwlib::pin_out & clockPin, uint8_t bitOrder, uint8_t val)
-{
-  uint8_t i;
-  for (i = 0; i < 8; i++) {
-    if (bitOrder == LSBFIRST) {
-      dataPin.set(!!(val & (1 << i)));  // digitalWrite(dataPin, !!(val & (1 << i)));
-    } else {
-      dataPin.set(!!(val & (1 << (7 - i))));  // digitalWrite(dataPin, !!(val & (1 << (7 - i))));
-    }
+// void shiftOut(hwlib::pin_out & dataPin, hwlib::pin_out & clockPin, uint8_t bitOrder, uint8_t val)
+// {
+//   uint8_t i;
+//   for (i = 0; i < 8; i++) {
+//     if (bitOrder == LSBFIRST) {
+//       dataPin.set(!!(val & (1 << i)));  // digitalWrite(dataPin, !!(val & (1 << i)));
+//     } else {
+//       dataPin.set(!!(val & (1 << (7 - i))));  // digitalWrite(dataPin, !!(val & (1 << (7 - i))));
+//     }
 
-    clockPin.set(1); // digitalWrite(clockPin, HIGH);
-    clockPin.set(0); // digitalWrite(clockPin, LOW);            
-  }
-}
+//     clockPin.set(1); // digitalWrite(clockPin, HIGH);
+//     clockPin.set(0); // digitalWrite(clockPin, LOW);            
+//   }
+// }
 
-
-// for Count in range(8):
-//    time.sleep(self.CLK_PERIOD)
-//    RPi.GPIO.output(self.RTC_DS1302_SCLK, 0)
-//    Bit = operator.mod(Byte, 2)
-//    Byte = operator.div(Byte, 2)
-//    time.sleep(self.CLK_PERIOD)
-//    RPi.GPIO.output(self.RTC_DS1302_IO, Bit)
-//    time.sleep(self.CLK_PERIOD)
-//    RPi.GPIO.output(self.RTC_DS1302_SCLK, 1)
 void DS1302::writeOut(const uint8_t value) {
   // pinMode(io_pin_, OUTPUT);
   // This assumes that shiftOut is 'slow' enough for the DS1302 to read the
@@ -131,22 +121,17 @@ void DS1302::writeOut(const uint8_t value) {
   // for at least 0.25us at 5V or 1us at 2V. Experimentally, a 16MHz Arduino
   // seems to spend ~4us high and ~12us low when shifting.
   // spi_bus_.write_and_read(); // shiftOut(io_pin_, sclk_pin_, LSBFIRST, value);
-  auto io_pin_OUT = hwlib::target::pin_out( hwlib::target::pins::d12 );
-  shiftOut(io_pin_OUT, sclk_pin_, LSBFIRST, value);
+  // shiftOut(io_pin_OUT, sclk_pin_, LSBFIRST, value);
+
+  uint8_t i;
+
+  for (i = 0; i < 8; i++)  {
+      io_pin_.set(!!(value & (1 << i))); // digitalWrite(dataPin, !!(val & (1 << i)));
+      sclk_pin_.set(1); // digitalWrite(clockPin, HIGH);
+      sclk_pin_.set(0); // digitalWrite(clockPin, LOW);        
+  }
 }
 
-
-
-// Byte = 0
-// for Count in range(8):
-//   time.sleep(self.CLK_PERIOD)
-//   RPi.GPIO.output(self.RTC_DS1302_SCLK, 1)
-//   time.sleep(self.CLK_PERIOD)
-//   RPi.GPIO.output(self.RTC_DS1302_SCLK, 0)
-//   time.sleep(self.CLK_PERIOD)
-//   Bit = RPi.GPIO.input(self.RTC_DS1302_IO)
-//   Byte |= ((2 ** Count) * Bit)
-// return Byte
 uint8_t DS1302::readIn() {
   uint8_t input_value = 0;
   uint8_t bit = 0;
