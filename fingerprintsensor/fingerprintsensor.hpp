@@ -104,7 +104,6 @@ public:
     class Command_packet {
     public:
         byte packet[12];
-        // byte r_packet[12]; // TEMPORARY
 
     protected:
         const byte start_code1 = 0x55;
@@ -114,8 +113,10 @@ public:
         word command;
         word checksum;
 
+        int baud_rate;
+
     public:
-        Command_packet(double_word input_parameter, word input_command);
+        Command_packet(double_word input_parameter, word input_command, int input_baud_rate);
         void set_parameter(double_word input_parameter);
         void set_command(word input_command);
         void set_checksum(word input_checksum);
@@ -127,6 +128,7 @@ public:
     class Response_packet {
     public:
         byte packet[12];
+
     protected:
         const byte response_code1 = 0x55;
         const byte response_code2 = 0xAA;
@@ -135,8 +137,10 @@ public:
         word response;
         word checksum;
         
+        int baud_rate;
+        
     public:
-        Response_packet();
+        Response_packet(int input_baud_rate);
         int recieve(int input_baud_rate);
     };
 

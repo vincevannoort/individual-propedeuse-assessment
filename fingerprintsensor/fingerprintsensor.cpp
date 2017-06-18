@@ -24,11 +24,11 @@ Constructors
 */
 
 // @brief Constructor for Command packet
-Fingerprintsensor::Command_packet::Command_packet(double_word input_parameter, word input_command) {
-    set_parameter(input_parameter);
-    set_command(input_command);
+Fingerprintsensor::Command_packet::Command_packet(double_word input_parameter, word input_command, int input_baud_rate):
+parameter(input_parameter), command(input_command), baud_rate(input_baud_rate)
+{
     set_checksum(calculate_checksum());
-    send(9600); // @TEMPORARY HARDCODED
+    send(baud_rate);
 }
 
 // @brief Set parameter for command packet
@@ -87,8 +87,10 @@ void Fingerprintsensor::Command_packet::send(int input_baud_rate) {
 }
 
 // @brief Constructor for Response packet
-Fingerprintsensor::Response_packet::Response_packet() {
-    recieve(9600); // @TEMPORARY HARDCODED
+Fingerprintsensor::Response_packet::Response_packet(int input_baud_rate): 
+baud_rate(input_baud_rate)
+{
+    recieve(baud_rate);
 }
 
 // @brief Recieve command which polls for a response, then acquires the needed data
@@ -99,13 +101,40 @@ int Fingerprintsensor::Response_packet::recieve(int input_baud_rate) {
 
     red_led.set(1);
     for(byte & packet_byte : packet) {
-        packet_byte = hwlib::uart_getc_bit_banged_pin(rx_pin);
+        packet_byte = hwlib::uart_getc_bit_banged_pin_custom_baudrate(rx_pin, input_baud_rate);
     }
     red_led.set(0);
 
-    for(const byte & packet_byte : packet) {
-        hwlib::uart_putc_bit_banged_pin_custom_baudrate(packet_byte, tx_pin, input_baud_rate);
-    }
+    /*
+    Debugging OLED | TEMPORARY
+    */
+    hwlib::target::pin_oc scl                 = hwlib::target::pin_oc( hwlib::target::pins::scl );
+    hwlib::target::pin_oc sda                 = hwlib::target::pin_oc( hwlib::target::pins::sda );
+    hwlib::i2c_bus_bit_banged_scl_sda i2c_bus = hwlib::i2c_bus_bit_banged_scl_sda( scl, sda );
+    hwlib::glcd_oled oled                     = hwlib::glcd_oled( i2c_bus, 0x3c ); 
+
+    hwlib::font_default_8x8 font              = hwlib::font_default_8x8();
+    hwlib::window_ostream display             = hwlib::window_ostream( oled, font );
+
+    display << "\f" << "Response: " 
+    << "\n"
+    << "0:[" << (int) packet[0] << "]" << " " 
+    << "1:[" << (int) packet[1] << "]" << " " 
+    << "\n"
+    << "2:[" << (int) packet[2] << "]" << " " 
+    << "3:[" << (int) packet[3] << "]" << " " 
+    << "\n"
+    << "4:[" << (int) packet[4] << "]" << " " 
+    << "5:[" << (int) packet[5] << "]" << " " 
+    << "\n"
+    << "6:[" << (int) packet[6] << "]" << " " 
+    << "7:[" << (int) packet[7] << "]" << " " 
+    << "\n"
+    << "8:[" << (int) packet[8] << "]" << " " 
+    << "9:[" << (int) packet[9] << "]" << " " 
+    << "\n"
+    << "10:[" << (int) packet[10] << "]" << " " 
+    << "11:[" << (int) packet[11] << "]" << hwlib::flush;
     return 0;
 }
 
@@ -115,8 +144,8 @@ Communication Commands functions
 
 // @brief Initialise the fingerprint sensor
 int Fingerprintsensor::initialise() {
-    Fingerprintsensor::Command_packet command_packet(0x00, ((word) command_packet_data::Open));
-    Fingerprintsensor::Response_packet response_packet;
+    Fingerprintsensor::Command_packet command_packet(0x00, ((word) command_packet_data::Open), baud_rate);
+    Fingerprintsensor::Response_packet response_packet(baud_rate);
 
     if (debug) {
         hwlib::cout << "Initialise" << "\n";
@@ -131,8 +160,8 @@ int Fingerprintsensor::control_led(bool on) {
     double input_parameter;
     if (on) { input_parameter = 0x01; } 
     else {  input_parameter = 0x00; }
-    Fingerprintsensor::Command_packet command_packet(input_parameter, ((word) command_packet_data::CmosLed));
-    Fingerprintsensor::Response_packet response_packet;
+    Fingerprintsensor::Command_packet command_packet(input_parameter, ((word) command_packet_data::CmosLed), baud_rate);
+    Fingerprintsensor::Response_packet response_packet(baud_rate);
 
     if (debug) {
         hwlib::cout << "Control led" << "\n";
@@ -143,8 +172,8 @@ int Fingerprintsensor::control_led(bool on) {
 // @brief Change the internal baud rate of the fingerprint sensor
 // @param int baud_rate, baud rate to set (between 9600 - 115200)
 int Fingerprintsensor::change_baud_rate(int input_baud_rate) {
-    Fingerprintsensor::Command_packet command_packet(input_baud_rate, ((word) command_packet_data::ChangeBaudrate));
-    Fingerprintsensor::Response_packet response_packet;
+    Fingerprintsensor::Command_packet command_packet(input_baud_rate, ((word) command_packet_data::ChangeBaudrate), baud_rate);
+    Fingerprintsensor::Response_packet response_packet(baud_rate);
     baud_rate = input_baud_rate;
 
     if (debug) {
@@ -155,41 +184,11 @@ int Fingerprintsensor::change_baud_rate(int input_baud_rate) {
 
 // @brief Get enrolled fingerprint count
 int Fingerprintsensor::get_enrolled_fingerprint_count() {
-    Fingerprintsensor::Command_packet command_packet(0x00, ((word) command_packet_data::GetEnrollCount));
-    Fingerprintsensor::Response_packet response_packet;
-
-    /*
-    Debugging OLED | TEMPORARY
-    */
-    hwlib::target::pin_oc scl                 = hwlib::target::pin_oc( hwlib::target::pins::scl );
-    hwlib::target::pin_oc sda                 = hwlib::target::pin_oc( hwlib::target::pins::sda );
-    hwlib::i2c_bus_bit_banged_scl_sda i2c_bus = hwlib::i2c_bus_bit_banged_scl_sda( scl, sda );
-    hwlib::glcd_oled oled                     = hwlib::glcd_oled( i2c_bus, 0x3c ); 
-
-    hwlib::font_default_8x8 font              = hwlib::font_default_8x8();
-    hwlib::window_ostream display             = hwlib::window_ostream( oled, font );
+    Fingerprintsensor::Command_packet command_packet(0x00, ((word) command_packet_data::GetEnrollCount), baud_rate);
+    Fingerprintsensor::Response_packet response_packet(baud_rate);
 
     if (debug) {
         hwlib::cout << "Get count" << "\n";
-        display << "\f" << "Response: " 
-        << "\n"
-        << "0:[" << (int) response_packet.packet[0] << "]" << " " 
-        << "1:[" << (int) response_packet.packet[1] << "]" << " " 
-        << "\n"
-        << "2:[" << (int) response_packet.packet[2] << "]" << " " 
-        << "3:[" << (int) response_packet.packet[3] << "]" << " " 
-        << "\n"
-        << "4:[" << (int) response_packet.packet[4] << "]" << " " 
-        << "5:[" << (int) response_packet.packet[5] << "]" << " " 
-        << "\n"
-        << "6:[" << (int) response_packet.packet[6] << "]" << " " 
-        << "7:[" << (int) response_packet.packet[7] << "]" << " " 
-        << "\n"
-        << "8:[" << (int) response_packet.packet[8] << "]" << " " 
-        << "9:[" << (int) response_packet.packet[9] << "]" << " " 
-        << "\n"
-        << "10:[" << (int) response_packet.packet[10] << "]" << " " 
-        << "11:[" << (int) response_packet.packet[11] << "]" << hwlib::flush;
     } 
     return response_packet.packet[4];
 }
@@ -197,8 +196,8 @@ int Fingerprintsensor::get_enrolled_fingerprint_count() {
 // @brief Check status of fingerprint id
 // @param int id, value between 0 - 19
 int Fingerprintsensor::check_enrollment_status(int id) {
-    Fingerprintsensor::Command_packet command_packet(id, ((word) command_packet_data::CheckEnrolled));
-    Fingerprintsensor::Response_packet response_packet;
+    Fingerprintsensor::Command_packet command_packet(id, ((word) command_packet_data::CheckEnrolled), baud_rate);
+    Fingerprintsensor::Response_packet response_packet(baud_rate);
 
     if (debug) {
         hwlib::cout << "Check status" << "\n";
@@ -210,8 +209,8 @@ int Fingerprintsensor::check_enrollment_status(int id) {
 // @param int id, value between 0 - 19
 int Fingerprintsensor::start_enrollment() {
     double input_parameter = get_enrolled_fingerprint_count();
-    Fingerprintsensor::Command_packet command_packet(input_parameter, ((word) command_packet_data::EnrollStart));
-    Fingerprintsensor::Response_packet response_packet;
+    Fingerprintsensor::Command_packet command_packet(input_parameter, ((word) command_packet_data::EnrollStart), baud_rate);
+    Fingerprintsensor::Response_packet response_packet(baud_rate);
 
     if (debug) {
         hwlib::cout << "Start enrollment" << "\n";
@@ -230,8 +229,8 @@ int Fingerprintsensor::enrollment(int template_number) {
     } else if ( template_number == 3) {
         input_command = ((word) command_packet_data::Enroll3);
     }
-    Fingerprintsensor::Command_packet command_packet(0x00, input_command);
-    Fingerprintsensor::Response_packet response_packet;
+    Fingerprintsensor::Command_packet command_packet(0x00, input_command, baud_rate);
+    Fingerprintsensor::Response_packet response_packet(baud_rate);
 
     if (debug) {
         hwlib::cout << "Enrollment" << "\n";
@@ -241,8 +240,8 @@ int Fingerprintsensor::enrollment(int template_number) {
 
 // @brief Check if a finger sits on the fingerprintsensor
 int Fingerprintsensor::check_finger_pressing_status() {
-    Fingerprintsensor::Command_packet command_packet(0x00, ((word) command_packet_data::IsPressFinger));
-    Fingerprintsensor::Response_packet response_packet;
+    Fingerprintsensor::Command_packet command_packet(0x00, ((word) command_packet_data::IsPressFinger), baud_rate);
+    Fingerprintsensor::Response_packet response_packet(baud_rate);
 
     if (debug) {
         hwlib::cout << "Check fingerpress" << "\n";
@@ -253,8 +252,8 @@ int Fingerprintsensor::check_finger_pressing_status() {
 // @brief Delete one fingerprint based on a id
 // @param int id, id to delete from the fingerprintsensor
 int Fingerprintsensor::delete_one_fingerprint(int id) {
-    Fingerprintsensor::Command_packet command_packet(id, ((word) command_packet_data::DeleteID));
-    Fingerprintsensor::Response_packet response_packet;
+    Fingerprintsensor::Command_packet command_packet(id, ((word) command_packet_data::DeleteID), baud_rate);
+    Fingerprintsensor::Response_packet response_packet(baud_rate);
 
     if (debug) {
         hwlib::cout << "Delete one fingerprint" << "\n";
@@ -265,8 +264,8 @@ int Fingerprintsensor::delete_one_fingerprint(int id) {
 // @brief Delete one fingerprint based on a id
 // @param int id, id to delete from the fingerprintsensor
 int Fingerprintsensor::delete_all_fingerprints() {
-    Fingerprintsensor::Command_packet command_packet(0x00, ((word) command_packet_data::DeleteAll));
-    Fingerprintsensor::Response_packet response_packet;
+    Fingerprintsensor::Command_packet command_packet(0x00, ((word) command_packet_data::DeleteAll), baud_rate);
+    Fingerprintsensor::Response_packet response_packet(baud_rate);
 
     if (debug) {
         hwlib::cout << "Delete all fingerprints" << "\n";
@@ -277,8 +276,8 @@ int Fingerprintsensor::delete_all_fingerprints() {
 // @brief Verify a fingerprint based on id
 // @param int id, id to verify a fingerprint with
 int Fingerprintsensor::verification_1_1(int id) {
-    Fingerprintsensor::Command_packet command_packet(id, ((word) command_packet_data::Verify1_1));
-    Fingerprintsensor::Response_packet response_packet;
+    Fingerprintsensor::Command_packet command_packet(id, ((word) command_packet_data::Verify1_1), baud_rate);
+    Fingerprintsensor::Response_packet response_packet(baud_rate);
 
     if (debug) {
         hwlib::cout << "Verification 1:1" << "\n";
@@ -288,8 +287,8 @@ int Fingerprintsensor::verification_1_1(int id) {
 
 // @brief Verify a fingerprint on all existing fingerprints
 int Fingerprintsensor::identification_1_N() {
-    Fingerprintsensor::Command_packet command_packet(0x00, ((word) command_packet_data::Identify1_N));
-    Fingerprintsensor::Response_packet response_packet;
+    Fingerprintsensor::Command_packet command_packet(0x00, ((word) command_packet_data::Identify1_N), baud_rate);
+    Fingerprintsensor::Response_packet response_packet(baud_rate);
 
     if (debug) {
         hwlib::cout << "Verification 1:N" << "\n";
@@ -306,8 +305,8 @@ int Fingerprintsensor::capture_fingerprint(const char* quality) {
     } else if (strcmp(quality, "best")) {
         input_parameter = 0x01;
     }
-    Fingerprintsensor::Command_packet command_packet(input_parameter, ((word) command_packet_data::CaptureFinger));
-    Fingerprintsensor::Response_packet response_packet;
+    Fingerprintsensor::Command_packet command_packet(input_parameter, ((word) command_packet_data::CaptureFinger), baud_rate);
+    Fingerprintsensor::Response_packet response_packet(baud_rate);
 
     if (debug) {
         hwlib::cout << "Capture" << "\n";
@@ -317,8 +316,8 @@ int Fingerprintsensor::capture_fingerprint(const char* quality) {
 
 // @brief Terminate/close the fingerprint sensor
 int Fingerprintsensor::terminate() {
-    Fingerprintsensor::Command_packet command_packet(0x00, ((word) command_packet_data::Close));
-    Fingerprintsensor::Response_packet response_packet;
+    Fingerprintsensor::Command_packet command_packet(0x00, ((word) command_packet_data::Close), baud_rate);
+    Fingerprintsensor::Response_packet response_packet(baud_rate);
 
     if (debug) {
         hwlib::cout << "Terminate" << "\n";
