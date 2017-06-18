@@ -159,7 +159,7 @@ int Fingerprintsensor::get_enrolled_fingerprint_count() {
     Fingerprintsensor::Response_packet response_packet;
 
     /*
-    Debugging OLED
+    Debugging OLED | TEMPORARY
     */
     hwlib::target::pin_oc scl                 = hwlib::target::pin_oc( hwlib::target::pins::scl );
     hwlib::target::pin_oc sda                 = hwlib::target::pin_oc( hwlib::target::pins::sda );
@@ -169,30 +169,27 @@ int Fingerprintsensor::get_enrolled_fingerprint_count() {
     hwlib::font_default_8x8 font              = hwlib::font_default_8x8();
     hwlib::window_ostream display             = hwlib::window_ostream( oled, font );
 
-    display << "\f" << "Response: " 
-    << "\n"
-    << "0:[" << (int) response_packet.packet[0] << "]" << " " 
-    << "1:[" << (int) response_packet.packet[1] << "]" << " " 
-    << "\n"
-    << "2:[" << (int) response_packet.packet[2] << "]" << " " 
-    << "3:[" << (int) response_packet.packet[3] << "]" << " " 
-    << "\n"
-    << "4:[" << (int) response_packet.packet[4] << "]" << " " 
-    << "5:[" << (int) response_packet.packet[5] << "]" << " " 
-    << "\n"
-    << "6:[" << (int) response_packet.packet[6] << "]" << " " 
-    << "7:[" << (int) response_packet.packet[7] << "]" << " " 
-    << "\n"
-    << "8:[" << (int) response_packet.packet[8] << "]" << " " 
-    << "9:[" << (int) response_packet.packet[9] << "]" << " " 
-    << "\n"
-    << "10:[" << (int) response_packet.packet[10] << "]" << " " 
-    << "11:[" << (int) response_packet.packet[11] << "]" << hwlib::flush;
-
-    hwlib::wait_ms(5000);
-
     if (debug) {
         hwlib::cout << "Get count" << "\n";
+        display << "\f" << "Response: " 
+        << "\n"
+        << "0:[" << (int) response_packet.packet[0] << "]" << " " 
+        << "1:[" << (int) response_packet.packet[1] << "]" << " " 
+        << "\n"
+        << "2:[" << (int) response_packet.packet[2] << "]" << " " 
+        << "3:[" << (int) response_packet.packet[3] << "]" << " " 
+        << "\n"
+        << "4:[" << (int) response_packet.packet[4] << "]" << " " 
+        << "5:[" << (int) response_packet.packet[5] << "]" << " " 
+        << "\n"
+        << "6:[" << (int) response_packet.packet[6] << "]" << " " 
+        << "7:[" << (int) response_packet.packet[7] << "]" << " " 
+        << "\n"
+        << "8:[" << (int) response_packet.packet[8] << "]" << " " 
+        << "9:[" << (int) response_packet.packet[9] << "]" << " " 
+        << "\n"
+        << "10:[" << (int) response_packet.packet[10] << "]" << " " 
+        << "11:[" << (int) response_packet.packet[11] << "]" << hwlib::flush;
     } 
     return response_packet.packet[4];
 }
