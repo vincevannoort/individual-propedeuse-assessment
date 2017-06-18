@@ -135,49 +135,49 @@ void Fingerprintsensor::Response_packet::recieve() {
         hwlib::font_default_8x8 font              = hwlib::font_default_8x8();
         hwlib::window_ostream display             = hwlib::window_ostream( oled, font );
 
-        switch(parameter) {
-            case 0x0000:
-                display << "\f" << "NO_ERROR" << "\n" << parameter << "\n" << response << hwlib::flush; break;
-            case 0x1001:
-                display << "\f" << "TIMEOUT" << "\n" << parameter << "\n" << response << hwlib::flush; break;
-            case 0x1002:
-                display << "\f" << "INVALID_BAUDRATE" << "\n" << parameter << "\n" << response << hwlib::flush; break;
-            case 0x1003:
-                display << "\f" << "INVALID_POS" << "\n" << parameter << "\n" << response << hwlib::flush; break;
-            case 0x1004:
-                display << "\f" << "IS_NOT_USED" << "\n" << parameter << "\n" << response << hwlib::flush; break;
-            case 0x1005:
-                display << "\f" << "IS_ALREADY_USED" << "\n" << parameter << "\n" << response << hwlib::flush; break;
-            case 0x1006:
-                display << "\f" << "COMM_ERR" << "\n" << parameter << "\n" << response << hwlib::flush; break;
-            case 0x1007:
-                display << "\f" << "VERIFY_FAILED" << "\n" << parameter << "\n" << response << hwlib::flush; break;
-            case 0x1008:
-                display << "\f" << "IDENTIFY_FAILED" << "\n" << parameter << "\n" << response << hwlib::flush; break;
-            case 0x1009:
-                display << "\f" << "DB_IS_FULL" << "\n" << parameter << "\n" << response << hwlib::flush; break;
-            case 0x100A:
-                display << "\f" << "DB_IS_EMPTY" << "\n" << parameter << "\n" << response << hwlib::flush; break;
-            case 0x100B:
-                display << "\f" << "TURN_ERR" << "\n" << parameter << "\n" << response << hwlib::flush; break;
-            case 0x100C:
-                display << "\f" << "BAD_FINGER" << "\n" << parameter << "\n" << response << hwlib::flush; break;
-            case 0x100D:
-                display << "\f" << "ENROLL_FAILED" << "\n" << parameter << "\n" << response << hwlib::flush; break;
-            case 0x100E:
-                display << "\f" << "IS_NOT_SUPPORTED" << "\n" << parameter << "\n" << response << hwlib::flush; break;
-            case 0x100F:
-                display << "\f" << "DEV_ERR" << "\n" << parameter << "\n" << response << hwlib::flush; break;
-            case 0x1010:
-                display << "\f" << "CAPTURE_CANCELED" << "\n" << parameter << "\n" << response << hwlib::flush; break;
-            case 0x1011:
-                display << "\f" << "INVALID_PARAM" << "\n" << parameter << "\n" << response << hwlib::flush; break;
-            case 0x1012:
-                display << "\f" << "FINGER_IS_NOT_PRESSED" << "\n" << parameter << "\n" << response << hwlib::flush; break;
-            case 0XFFFF:
-                display << "\f" << "INVALID" << "\n" << parameter << "\n" << response << hwlib::flush; break;
+        switch( (double_word)parameter ) {
+            case (double_word)Fingerprintsensor::response_packet_data::NO_ERROR:
+                display << "\f" << "NO_ERROR" << "\n" << hwlib::flush; break;
+            case (double_word)Fingerprintsensor::response_packet_data::NACK_TIMEOUT:
+                display << "\f" << "TIMEOUT" << "\n" << hwlib::flush; break;
+            case (double_word)Fingerprintsensor::response_packet_data::NACK_INVALID_BAUDRATE:
+                display << "\f" << "INVALID_BAUDRATE" << "\n" << hwlib::flush; break;
+            case (double_word)Fingerprintsensor::response_packet_data::NACK_INVALID_POS:
+                display << "\f" << "INVALID_POS" << "\n" << hwlib::flush; break;
+            case (double_word)Fingerprintsensor::response_packet_data::NACK_IS_NOT_USED:
+                display << "\f" << "IS_NOT_USED" << "\n" << hwlib::flush; break;
+            case (double_word)Fingerprintsensor::response_packet_data::NACK_IS_ALREADY_USED:
+                display << "\f" << "IS_ALREADY_USED" << "\n" << hwlib::flush; break;
+            case (double_word)Fingerprintsensor::response_packet_data::NACK_COMM_ERR:
+                display << "\f" << "COMM_ERR" << "\n" << hwlib::flush; break;
+            case (double_word)Fingerprintsensor::response_packet_data::NACK_VERIFY_FAILED:
+                display << "\f" << "VERIFY_FAILED" << "\n" << hwlib::flush; break;
+            case (double_word)Fingerprintsensor::response_packet_data::NACK_IDENTIFY_FAILED:
+                display << "\f" << "IDENTIFY_FAILED" << "\n" << hwlib::flush; break;
+            case (double_word)Fingerprintsensor::response_packet_data::NACK_DB_IS_FULL:
+                display << "\f" << "DB_IS_FULL" << "\n" << hwlib::flush; break;
+            case (double_word)Fingerprintsensor::response_packet_data::NACK_DB_IS_EMPTY:
+                display << "\f" << "DB_IS_EMPTY" << "\n" << hwlib::flush; break;
+            case (double_word)Fingerprintsensor::response_packet_data::NACK_TURN_ERR:
+                display << "\f" << "TURN_ERR" << "\n" << hwlib::flush; break;
+            case (double_word)Fingerprintsensor::response_packet_data::NACK_BAD_FINGER:
+                display << "\f" << "BAD_FINGER" << "\n" << hwlib::flush; break;
+            case (double_word)Fingerprintsensor::response_packet_data::NACK_ENROLL_FAILED:
+                display << "\f" << "ENROLL_FAILED" << "\n" << hwlib::flush; break;
+            case (double_word)Fingerprintsensor::response_packet_data::NACK_IS_NOT_SUPPORTED:
+                display << "\f" << "IS_NOT_SUPPORTED" << "\n" << hwlib::flush; break;
+            case (double_word)Fingerprintsensor::response_packet_data::NACK_DEV_ERR:
+                display << "\f" << "DEV_ERR" << "\n" << hwlib::flush; break;
+            case (double_word)Fingerprintsensor::response_packet_data::NACK_CAPTURE_CANCELED:
+                display << "\f" << "CAPTURE_CANCELED" << "\n" << hwlib::flush; break;
+            case (double_word)Fingerprintsensor::response_packet_data::NACK_INVALID_PARAM:
+                display << "\f" << "INVALID_PARAM" << "\n" << hwlib::flush; break;
+            case (double_word)Fingerprintsensor::response_packet_data::NACK_FINGER_IS_NOT_PRESSED:
+                display << "\f" << "FINGER_IS_NOT_PRESSED" << "\n" << hwlib::flush; break;
+            case (double_word)Fingerprintsensor::response_packet_data::INVALID:
+                display << "\f" << "INVALID" << "\n" << hwlib::flush; break;
             default:
-                display << "\f" << "Nothing" << "\n" << parameter << "\n" << response << hwlib::flush;
+                display << "\f" << "Nothing" << "\n" << hwlib::flush;
         }
     }
 }

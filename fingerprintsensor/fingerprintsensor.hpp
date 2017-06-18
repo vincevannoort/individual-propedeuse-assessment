@@ -33,7 +33,7 @@ protected:
     /*
     Command packet
     */
-    enum class command_packet_data {
+    enum class command_packet_data : word {
         NotSet              = 0x00,
         Open                = 0x01,
         Close               = 0x02,
@@ -71,7 +71,7 @@ protected:
     /*
     Response packet
     */
-    enum class response_packet_data {
+    enum class response_packet_data : double_word {
         NO_ERROR                   = 0x0000,
         NACK_TIMEOUT               = 0x1001,
         NACK_INVALID_BAUDRATE      = 0x1002,
