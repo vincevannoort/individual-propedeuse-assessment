@@ -28,7 +28,6 @@ protected:
     hwlib::pin_out & tx;
     hwlib::pin_in & rx;
     int baud_rate = 9600;
-    const bool debug = false;
 
 
     /*
@@ -139,6 +138,7 @@ public:
         
     public:
         Response_packet(int input_baud_rate);
+        int get_parameter();
         void recieve();
     };
 
@@ -169,6 +169,7 @@ public:
     /*
     Control functions
     */
+    int identify_fingerprint();
     int register_fingerprint();
 };
 

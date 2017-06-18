@@ -4,6 +4,8 @@
 #include <cstring>
 #include "hwlib.hpp"
 
+#define debug 0
+
 /*
 Constructor & Deconstructor
 */
@@ -93,9 +95,12 @@ baud_rate(input_baud_rate)
     recieve();
 }
 
+int Fingerprintsensor::Response_packet::get_parameter() {
+    return parameter;
+}
+
 // @brief Recieve command which polls for a response, then acquires the needed data
 void Fingerprintsensor::Response_packet::recieve() {
-    auto tx_pin = hwlib::target::pin_out( hwlib::target::pins::d14 );
     auto rx_pin = hwlib::target::pin_in( hwlib::target::pins::d19 );
     auto red_led = hwlib::target::pin_out( hwlib::target::pins::d3 );
 
@@ -114,41 +119,67 @@ void Fingerprintsensor::Response_packet::recieve() {
     checksum = packet[10];
     checksum = (packet[11] << 8) | checksum;
 
-    // /*
-    // Debugging OLED | TEMPORARY
-    // */
-    // hwlib::target::pin_oc scl                 = hwlib::target::pin_oc( hwlib::target::pins::scl );
-    // hwlib::target::pin_oc sda                 = hwlib::target::pin_oc( hwlib::target::pins::sda );
-    // hwlib::i2c_bus_bit_banged_scl_sda i2c_bus = hwlib::i2c_bus_bit_banged_scl_sda( scl, sda );
-    // hwlib::glcd_oled oled                     = hwlib::glcd_oled( i2c_bus, 0x3c ); 
+    if (debug) {
+        auto tx_pin = hwlib::target::pin_out( hwlib::target::pins::d14 );
+        hwlib::uart_putc_bit_banged_pin_custom_baudrate('\n', tx_pin, baud_rate);
+        hwlib::uart_putc_bit_banged_pin_custom_baudrate(packet[4], tx_pin, baud_rate);
 
-    // hwlib::font_default_8x8 font              = hwlib::font_default_8x8();
-    // hwlib::window_ostream display             = hwlib::window_ostream( oled, font );
+        /*
+        Debugging OLED
+        */
+        hwlib::target::pin_oc scl                 = hwlib::target::pin_oc( hwlib::target::pins::scl );
+        hwlib::target::pin_oc sda                 = hwlib::target::pin_oc( hwlib::target::pins::sda );
+        hwlib::i2c_bus_bit_banged_scl_sda i2c_bus = hwlib::i2c_bus_bit_banged_scl_sda( scl, sda );
+        hwlib::glcd_oled oled                     = hwlib::glcd_oled( i2c_bus, 0x3c ); 
 
-    // display << "\f" << "Response: " 
-    // << "\n"
-    // << "P:[" << (int) parameter << "]" << " " 
-    // << "C:[" << (int) response << "]" << hwlib::flush;
+        hwlib::font_default_8x8 font              = hwlib::font_default_8x8();
+        hwlib::window_ostream display             = hwlib::window_ostream( oled, font );
 
-    // display << "\f" << "Response: " 
-    // << "\n"
-    // << "0:[" << (int) packet[0] << "]" << " " 
-    // << "1:[" << (int) packet[1] << "]" << " " 
-    // << "\n"
-    // << "2:[" << (int) packet[2] << "]" << " " 
-    // << "3:[" << (int) packet[3] << "]" << " " 
-    // << "\n"
-    // << "4:[" << (int) packet[4] << "]" << " " 
-    // << "5:[" << (int) packet[5] << "]" << " " 
-    // << "\n"
-    // << "6:[" << (int) packet[6] << "]" << " " 
-    // << "7:[" << (int) packet[7] << "]" << " " 
-    // << "\n"
-    // << "8:[" << (int) packet[8] << "]" << " " 
-    // << "9:[" << (int) packet[9] << "]" << " " 
-    // << "\n"
-    // << "10:[" << (int) packet[10] << "]" << " " 
-    // << "11:[" << (int) packet[11] << "]" << hwlib::flush;
+        switch(parameter) {
+            case 0x0000:
+                display << "\f" << "NO_ERROR" << "\n" << parameter << "\n" << response << hwlib::flush; break;
+            case 0x1001:
+                display << "\f" << "TIMEOUT" << "\n" << parameter << "\n" << response << hwlib::flush; break;
+            case 0x1002:
+                display << "\f" << "INVALID_BAUDRATE" << "\n" << parameter << "\n" << response << hwlib::flush; break;
+            case 0x1003:
+                display << "\f" << "INVALID_POS" << "\n" << parameter << "\n" << response << hwlib::flush; break;
+            case 0x1004:
+                display << "\f" << "IS_NOT_USED" << "\n" << parameter << "\n" << response << hwlib::flush; break;
+            case 0x1005:
+                display << "\f" << "IS_ALREADY_USED" << "\n" << parameter << "\n" << response << hwlib::flush; break;
+            case 0x1006:
+                display << "\f" << "COMM_ERR" << "\n" << parameter << "\n" << response << hwlib::flush; break;
+            case 0x1007:
+                display << "\f" << "VERIFY_FAILED" << "\n" << parameter << "\n" << response << hwlib::flush; break;
+            case 0x1008:
+                display << "\f" << "IDENTIFY_FAILED" << "\n" << parameter << "\n" << response << hwlib::flush; break;
+            case 0x1009:
+                display << "\f" << "DB_IS_FULL" << "\n" << parameter << "\n" << response << hwlib::flush; break;
+            case 0x100A:
+                display << "\f" << "DB_IS_EMPTY" << "\n" << parameter << "\n" << response << hwlib::flush; break;
+            case 0x100B:
+                display << "\f" << "TURN_ERR" << "\n" << parameter << "\n" << response << hwlib::flush; break;
+            case 0x100C:
+                display << "\f" << "BAD_FINGER" << "\n" << parameter << "\n" << response << hwlib::flush; break;
+            case 0x100D:
+                display << "\f" << "ENROLL_FAILED" << "\n" << parameter << "\n" << response << hwlib::flush; break;
+            case 0x100E:
+                display << "\f" << "IS_NOT_SUPPORTED" << "\n" << parameter << "\n" << response << hwlib::flush; break;
+            case 0x100F:
+                display << "\f" << "DEV_ERR" << "\n" << parameter << "\n" << response << hwlib::flush; break;
+            case 0x1010:
+                display << "\f" << "CAPTURE_CANCELED" << "\n" << parameter << "\n" << response << hwlib::flush; break;
+            case 0x1011:
+                display << "\f" << "INVALID_PARAM" << "\n" << parameter << "\n" << response << hwlib::flush; break;
+            case 0x1012:
+                display << "\f" << "FINGER_IS_NOT_PRESSED" << "\n" << parameter << "\n" << response << hwlib::flush; break;
+            case 0XFFFF:
+                display << "\f" << "INVALID" << "\n" << parameter << "\n" << response << hwlib::flush; break;
+            default:
+                display << "\f" << "Nothing" << "\n" << parameter << "\n" << response << hwlib::flush;
+        }
+    }
 }
 
 /*
@@ -164,6 +195,13 @@ int Fingerprintsensor::initialise() {
         hwlib::cout << "Initialise" << "\n";
         hwlib::cout << TEST_check_initialise_command_packet(command_packet.packet) << "\n";
     } 
+
+    auto tx_pin_debug = hwlib::target::pin_out( hwlib::target::pins::d14 );
+    hwlib::uart_putc_bit_banged_pin_custom_baudrate('\n', tx_pin_debug, baud_rate);
+    hwlib::uart_putc_bit_banged_pin_custom_baudrate(command_packet.packet[4], tx_pin_debug, baud_rate);
+    hwlib::uart_putc_bit_banged_pin_custom_baudrate(command_packet.packet[5], tx_pin_debug, baud_rate);
+    hwlib::uart_putc_bit_banged_pin_custom_baudrate(command_packet.packet[6], tx_pin_debug, baud_rate);
+    hwlib::uart_putc_bit_banged_pin_custom_baudrate(command_packet.packet[7], tx_pin_debug, baud_rate);
     return 0;
 }
 
@@ -203,7 +241,8 @@ int Fingerprintsensor::get_enrolled_fingerprint_count() {
     if (debug) {
         hwlib::cout << "Get count" << "\n";
     } 
-    return response_packet.packet[4];
+
+    return response_packet.get_parameter();
 }
 
 // @brief Check status of fingerprint id
@@ -259,7 +298,7 @@ int Fingerprintsensor::check_finger_pressing_status() {
     if (debug) {
         hwlib::cout << "Check fingerpress" << "\n";
     }
-    return response_packet.packet[4] | response_packet.packet[5] | response_packet.packet[6] | response_packet.packet[7];
+    return response_packet.get_parameter();
 }
 
 // @brief Delete one fingerprint based on a id
@@ -303,6 +342,18 @@ int Fingerprintsensor::identification_1_N() {
     Fingerprintsensor::Command_packet command_packet(0x00, ((word) command_packet_data::Identify1_N), baud_rate);
     Fingerprintsensor::Response_packet response_packet(baud_rate);
 
+    auto tx_pin = hwlib::target::pin_out( hwlib::target::pins::d14 );
+    hwlib::uart_putc_bit_banged_pin_custom_baudrate('\n', tx_pin, baud_rate);
+    hwlib::uart_putc_bit_banged_pin_custom_baudrate('\n', tx_pin, baud_rate);
+    hwlib::uart_putc_bit_banged_pin_custom_baudrate('\n', tx_pin, baud_rate);
+    hwlib::uart_putc_bit_banged_pin_custom_baudrate(response_packet.packet[4], tx_pin, baud_rate);
+    hwlib::uart_putc_bit_banged_pin_custom_baudrate(response_packet.packet[5], tx_pin, baud_rate);
+    hwlib::uart_putc_bit_banged_pin_custom_baudrate(response_packet.packet[6], tx_pin, baud_rate);
+    hwlib::uart_putc_bit_banged_pin_custom_baudrate(response_packet.packet[7], tx_pin, baud_rate);
+    hwlib::uart_putc_bit_banged_pin_custom_baudrate('\t', tx_pin, baud_rate);
+    hwlib::uart_putc_bit_banged_pin_custom_baudrate(response_packet.packet[8], tx_pin, baud_rate);
+    hwlib::uart_putc_bit_banged_pin_custom_baudrate(response_packet.packet[9], tx_pin, baud_rate);
+
     if (debug) {
         hwlib::cout << "Verification 1:N" << "\n";
     }
@@ -338,6 +389,26 @@ int Fingerprintsensor::terminate() {
     return 0;
 }
 
+// @brief Identify a fingerprint according to the steps to take in the datasheet
+int Fingerprintsensor::identify_fingerprint() {
+    auto green_led = hwlib::target::pin_out( hwlib::target::pins::d4 );
+    auto red_led = hwlib::target::pin_out( hwlib::target::pins::d5 );
+
+    red_led.set(1);
+    control_led(true);
+    while (check_finger_pressing_status()) {}
+    capture_fingerprint("best");
+    identification_1_N();
+    control_led(false);
+    green_led.set(1);
+    green_led.set(0); red_led.set(0);
+
+    if (debug) {
+        hwlib::cout << "Identy fingerprint" << "\n";
+    }
+    return 0;
+}
+
 // @brief Register a fingerprint according to the steps to take in the datasheet
 int Fingerprintsensor::register_fingerprint() {
     auto green_led = hwlib::target::pin_out( hwlib::target::pins::d4 );
@@ -353,6 +424,8 @@ int Fingerprintsensor::register_fingerprint() {
     while (!check_finger_pressing_status()) {}
     green_led.set(0); red_led.set(0);
 
+    hwlib::wait_ms(300);
+
     red_led.set(1);
     while (check_finger_pressing_status()) {}
     capture_fingerprint("best");
@@ -360,6 +433,8 @@ int Fingerprintsensor::register_fingerprint() {
     green_led.set(1);
     while (!check_finger_pressing_status()) {}
     green_led.set(0); red_led.set(0);
+
+    hwlib::wait_ms(300);
     
     red_led.set(1);
     while (check_finger_pressing_status()) {}
