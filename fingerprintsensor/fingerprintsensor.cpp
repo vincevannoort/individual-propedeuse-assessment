@@ -28,7 +28,7 @@ Fingerprintsensor::Command_packet::Command_packet(double_word input_parameter, w
 parameter(input_parameter), command(input_command), baud_rate(input_baud_rate)
 {
     set_checksum(calculate_checksum());
-    send(baud_rate);
+    send();
 }
 
 // @brief Set parameter for command packet
@@ -62,7 +62,7 @@ word Fingerprintsensor::Command_packet::calculate_checksum() {
 
 // @brief Send the command which should be initialized from this packet via the UART protocol
 // @param int input_baud_rate, controls the speed of the protocol
-void Fingerprintsensor::Command_packet::send(int input_baud_rate) {
+void Fingerprintsensor::Command_packet::send() {
     auto tx_pin = hwlib::target::pin_out( hwlib::target::pins::d18 );
     auto green_led = hwlib::target::pin_out( hwlib::target::pins::d2 );
 
@@ -81,7 +81,7 @@ void Fingerprintsensor::Command_packet::send(int input_baud_rate) {
 
     green_led.set(1);
     for(const byte & packet_byte : packet) {
-        hwlib::uart_putc_bit_banged_pin_custom_baudrate(packet_byte, tx_pin, input_baud_rate);
+        hwlib::uart_putc_bit_banged_pin_custom_baudrate(packet_byte, tx_pin, baud_rate);
     }
     green_led.set(0);
 }
@@ -90,52 +90,65 @@ void Fingerprintsensor::Command_packet::send(int input_baud_rate) {
 Fingerprintsensor::Response_packet::Response_packet(int input_baud_rate): 
 baud_rate(input_baud_rate)
 {
-    recieve(baud_rate);
+    recieve();
 }
 
 // @brief Recieve command which polls for a response, then acquires the needed data
-int Fingerprintsensor::Response_packet::recieve(int input_baud_rate) {
+void Fingerprintsensor::Response_packet::recieve() {
     auto tx_pin = hwlib::target::pin_out( hwlib::target::pins::d14 );
     auto rx_pin = hwlib::target::pin_in( hwlib::target::pins::d19 );
     auto red_led = hwlib::target::pin_out( hwlib::target::pins::d3 );
 
     red_led.set(1);
     for(byte & packet_byte : packet) {
-        packet_byte = hwlib::uart_getc_bit_banged_pin_custom_baudrate(rx_pin, input_baud_rate);
+        packet_byte = hwlib::uart_getc_bit_banged_pin_custom_baudrate(rx_pin, baud_rate);
     }
     red_led.set(0);
 
-    /*
-    Debugging OLED | TEMPORARY
-    */
-    hwlib::target::pin_oc scl                 = hwlib::target::pin_oc( hwlib::target::pins::scl );
-    hwlib::target::pin_oc sda                 = hwlib::target::pin_oc( hwlib::target::pins::sda );
-    hwlib::i2c_bus_bit_banged_scl_sda i2c_bus = hwlib::i2c_bus_bit_banged_scl_sda( scl, sda );
-    hwlib::glcd_oled oled                     = hwlib::glcd_oled( i2c_bus, 0x3c ); 
+    parameter = packet[4];
+    parameter = (packet[5] << 8) | parameter;
+    parameter = (packet[6] << 16) | parameter;
+    parameter = (packet[7] << 24) | parameter;
+    response = packet[8];
+    response = (packet[9] << 8) | response;
+    checksum = packet[10];
+    checksum = (packet[11] << 8) | checksum;
 
-    hwlib::font_default_8x8 font              = hwlib::font_default_8x8();
-    hwlib::window_ostream display             = hwlib::window_ostream( oled, font );
+    // /*
+    // Debugging OLED | TEMPORARY
+    // */
+    // hwlib::target::pin_oc scl                 = hwlib::target::pin_oc( hwlib::target::pins::scl );
+    // hwlib::target::pin_oc sda                 = hwlib::target::pin_oc( hwlib::target::pins::sda );
+    // hwlib::i2c_bus_bit_banged_scl_sda i2c_bus = hwlib::i2c_bus_bit_banged_scl_sda( scl, sda );
+    // hwlib::glcd_oled oled                     = hwlib::glcd_oled( i2c_bus, 0x3c ); 
 
-    display << "\f" << "Response: " 
-    << "\n"
-    << "0:[" << (int) packet[0] << "]" << " " 
-    << "1:[" << (int) packet[1] << "]" << " " 
-    << "\n"
-    << "2:[" << (int) packet[2] << "]" << " " 
-    << "3:[" << (int) packet[3] << "]" << " " 
-    << "\n"
-    << "4:[" << (int) packet[4] << "]" << " " 
-    << "5:[" << (int) packet[5] << "]" << " " 
-    << "\n"
-    << "6:[" << (int) packet[6] << "]" << " " 
-    << "7:[" << (int) packet[7] << "]" << " " 
-    << "\n"
-    << "8:[" << (int) packet[8] << "]" << " " 
-    << "9:[" << (int) packet[9] << "]" << " " 
-    << "\n"
-    << "10:[" << (int) packet[10] << "]" << " " 
-    << "11:[" << (int) packet[11] << "]" << hwlib::flush;
-    return 0;
+    // hwlib::font_default_8x8 font              = hwlib::font_default_8x8();
+    // hwlib::window_ostream display             = hwlib::window_ostream( oled, font );
+
+    // display << "\f" << "Response: " 
+    // << "\n"
+    // << "P:[" << (int) parameter << "]" << " " 
+    // << "C:[" << (int) response << "]" << hwlib::flush;
+
+    // display << "\f" << "Response: " 
+    // << "\n"
+    // << "0:[" << (int) packet[0] << "]" << " " 
+    // << "1:[" << (int) packet[1] << "]" << " " 
+    // << "\n"
+    // << "2:[" << (int) packet[2] << "]" << " " 
+    // << "3:[" << (int) packet[3] << "]" << " " 
+    // << "\n"
+    // << "4:[" << (int) packet[4] << "]" << " " 
+    // << "5:[" << (int) packet[5] << "]" << " " 
+    // << "\n"
+    // << "6:[" << (int) packet[6] << "]" << " " 
+    // << "7:[" << (int) packet[7] << "]" << " " 
+    // << "\n"
+    // << "8:[" << (int) packet[8] << "]" << " " 
+    // << "9:[" << (int) packet[9] << "]" << " " 
+    // << "\n"
+    // << "10:[" << (int) packet[10] << "]" << " " 
+    // << "11:[" << (int) packet[11] << "]" << hwlib::flush;
 }
 
 /*

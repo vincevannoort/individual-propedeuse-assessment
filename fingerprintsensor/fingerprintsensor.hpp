@@ -112,7 +112,6 @@ public:
         double_word parameter;
         word command;
         word checksum;
-
         int baud_rate;
 
     public:
@@ -121,7 +120,7 @@ public:
         void set_command(word input_command);
         void set_checksum(word input_checksum);
         word calculate_checksum();
-        void send(int input_baud_rate);
+        void send();
     };
 
     // @brief Response packet for recieving commands, 12 bytes being recieved
@@ -136,12 +135,11 @@ public:
         double_word parameter;
         word response;
         word checksum;
-        
         int baud_rate;
         
     public:
         Response_packet(int input_baud_rate);
-        int recieve(int input_baud_rate);
+        void recieve();
     };
 
     // @brief Data packet for sending and recieving
