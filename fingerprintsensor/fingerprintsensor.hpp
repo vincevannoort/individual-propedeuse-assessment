@@ -149,9 +149,6 @@ public:
     Commando functions
     */
     int initialise();
-    int send();
-    int recieve();
-    int execute();
     int control_led(bool on);
     int change_baud_rate(int baud_rate);
     int get_enrolled_fingerprint_count();
