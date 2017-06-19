@@ -1,6 +1,8 @@
 #ifndef TIMETRACKER_H
 #define TIMETRACKER_H
 
+#include "../fingerprintsensor/fingerprintsensor.hpp"
+#include "../realtimeclock/i2cRTC.hpp"
 #include <cstring>
 #include "hwlib.hpp"
 
@@ -12,31 +14,34 @@ typedef int32_t double_word;
 /*
 Employee
 */
-class Employee {
-private:
-	char[20] first_name;
-	char[30] last_name;
-public:
-	Employee(char[20] first_name, char[30] last_name, byte hours_worked);
-	char[50] get_name();
-	void set_hours_worked();
-	int get_hours_worked();
-}
+// class Employee {
+// private:
+// 	char first_name [20];
+// 	char last_name [30];
+// public:
+// 	// Employee(char first_name [20], char last_name [30], byte hours_worked);
+// 	Employee();
+// 	char* get_name();
+// 	void set_hours_worked();
+// 	int get_hours_worked();
+// };
 
 /*
 Time
 */
 class Time {
-private:
+public:
 	byte seconds;
 	byte minutes;
 	byte hours;
+	byte day;
 	byte date;
 	byte month;
 	word year;
-public:
-	Time(byte seconds, byte minutes, byte hours, byte date, byte month, word year)
-}
+	Time();
+	Time(byte seconds, byte minutes, byte hours, byte day, byte date, byte month, word year);
+	byte calculate_month();
+};
 
 /*
 Workday
@@ -45,7 +50,7 @@ class Workday {
 private:
 	Time start_time;
 	Time end_time;
-	Employee employee_of_workday;
+	// Employee employee_of_workday;
 public:
 	Workday();
 	void start_day(Time t);
@@ -58,10 +63,22 @@ Timetracker
 */
 class Timetracker {
 private:
-	Employee employees[20];
-	Workday workdays_from_each_employee;
+	Fingerprintsensor & fps;
+	i2cRTClib & rtc;
+
+	int status;
+	enum class status_data: int {
+		Checking = 0,
+		Registering = 1,
+		Identifying = 2,
+		StoringData = 3,
+	};
+
+	Workday time_entries;
 public:
-	Timetracker(Employee employees[20]);
+	Timetracker(Fingerprintsensor & fps, i2cRTClib & rtc, Time initial_time);
+	void start_tracking();
+	// void initialise(Time t = Time( 0, 0, 0, 23, 5, 2017 ));
 };
 
 #endif

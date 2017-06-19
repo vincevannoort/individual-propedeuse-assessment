@@ -1,7 +1,7 @@
 #include "./fingerprintsensor/fingerprintsensor.hpp"
-// #include "./timetracker/timetracker.hpp"
+#include "./timetracker/timetracker.hpp"
 #include "./realtimeclock/i2cRTC.hpp"
-// #include "./unit_tests/unit_tests.hpp"
+// #include "./unit_tests/unit_tes`ts.hpp"
 #include "hwlib.hpp"
 using namespace std;
 
@@ -11,11 +11,11 @@ int main() {
 	/*
 	Fingerprintsensor
 	*/
-	// hwlib::wait_ms(4); // max wait_ms, doesnt work above 4 millisecondstx_pin
-	// auto tx_pin = hwlib::target::pin_out( hwlib::target::pins::d18 );
-	// auto rx_pin = hwlib::target::pin_in( hwlib::target::pins::d19 );
- //    Fingerprintsensor fingerprintsensor(tx_pin, rx_pin);
-	// fingerprintsensor.initialise();
+	hwlib::wait_ms(4); // max wait_ms, doesnt work above 4 millisecondstx_pin
+	auto tx_pin = hwlib::target::pin_out( hwlib::target::pins::d18 );
+	auto rx_pin = hwlib::target::pin_in( hwlib::target::pins::d19 );
+ 	Fingerprintsensor fingerprintsensor(tx_pin, rx_pin);
+	fingerprintsensor.initialise();
 	// while(1) {
 	// 	fingerprintsensor.control_led(true);
 	// 	fingerprintsensor.control_led(false);
@@ -27,11 +27,17 @@ int main() {
 	auto scl = due::pin_oc( hwlib::target::pins::d8 ); 	
 	auto sda = due::pin_oc( hwlib::target::pins::d9 );
 	auto i2c = hwlib::i2c_bus_bit_banged_scl_sda( scl, sda );
-	i2cRTClib realtimeclock = i2cRTClib(i2c,2,4,2,7,5,12,16);
-	hwlib::wait_ms(1000);
-	hwlib::cout << "Start checking!\n";
-	while(1) {
-		hwlib::wait_ms(1000);
-		hwlib::cout << realtimeclock.get_seconden() << "\n"; 
-	}
+	i2cRTClib realtimeclock(i2c,2,4,2,7,5,12,16);
+	// hwlib::wait_ms(1000);
+	// hwlib::cout << "Start checking!\n";
+	// while(1) {
+	// 	hwlib::wait_ms(1000);
+	// 	hwlib::cout << realtimeclock.get_seconden() << "\n"; 
+	// }
+
+	/*
+	Timetracker
+	*/
+	Timetracker timetracker( fingerprintsensor, realtimeclock, Time( 0, 0, 0, 0, 23, 5, 2017 ));
+	timetracker.start_tracking();
 }

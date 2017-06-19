@@ -10,13 +10,13 @@
 //
 ///deze klasse maakt een rtc object uit een chip op een adress en een i2c bus
 
+#ifndef I2CRTC_H
+#define I2CRTC_H
 
-// ADDED BY VINCE
 typedef uint8_t byte;
 typedef uint8_t fast_byte;
 typedef int16_t word;
 typedef int32_t double_word;
-// ADDED BY VINCE
 
 class i2cRTClib {
 private:
@@ -113,7 +113,6 @@ public:
 		data_get[4] = bcd_Dec(data_get[4]);
 		data_get[5] = bcd_Dec(data_get[5]);
 		data_get[6] = bcd_Dec(data_get[6]);
-		
 		
 		hwlib::wait_ms( 1 );
 		return data_get[7];
@@ -354,3 +353,5 @@ public:
 	
 	
 };
+
+# endif
