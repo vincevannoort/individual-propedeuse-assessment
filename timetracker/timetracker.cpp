@@ -44,25 +44,37 @@ Timetracker
 */
 
 // @brief Constructor for the timetracker
-Timetracker::Timetracker(Fingerprintsensor & fps, i2cRTClib & rtc, Time initial_time):
-fps(fps), rtc(rtc), status(0) {
+Timetracker::Timetracker(Fingerprintsensor & fps, i2cRTClib & rtc, hwlib::pin_in & checking_pin, hwlib::pin_in & registering_pin, hwlib::pin_in & storing_pin, Time initial_time):
+fps(fps), rtc(rtc), checking_pin(checking_pin), registering_pin(registering_pin), storing_pin(storing_pin), status(0) {
 
 	rtc.set_time(initial_time.seconds, initial_time.minutes, initial_time.hours, initial_time.day, initial_time.date, initial_time.month, initial_time.year);
-	fps.register_fingerprint();
-	hwlib::wait_ms(500);
+	// fps.register_fingerprint();
+	// hwlib::wait_ms(500);
 }
 
 // @brief Initialise, set time of current day
 void Timetracker::start_tracking() {
 	while(true) {
-		if (status == (int)Timetracker::status_data::Checking) {
-			fps.identify_fingerprint();
-		} else if (status == (int)Timetracker::status_data::Registering) {
-			fps.register_fingerprint();
-		} else if (status == (int)Timetracker::status_data::Identifying) {
+		check_buttons_and_store_status();
+		
+		// if (status == (int)Timetracker::status_data::Checking) {
+		// 	fps.identify_fingerprint();
+		// } else if (status == (int)Timetracker::status_data::Registering) {
+		// 	fps.register_fingerprint();
+		// } else if (status == (int)Timetracker::status_data::Identifying) {
 
-		} else if (status == (int)Timetracker::status_data::StoringData) {
+		// } else if (status == (int)Timetracker::status_data::StoringData) {
 
-		}
+		// }
 	}
+}
+
+// @brief Check each button and set the state of the timetracker
+void Timetracker::check_buttons_and_store_status() {
+
+	while(!checking_pin.get()) { status = (int)Timetracker::status_data::Checking; }
+	while(!registering_pin.get()) { status = (int)Timetracker::status_data::Registering; }
+	while(!storing_pin.get()) { status = (int)Timetracker::status_data::StoringData; }
+
+	hwlib::cout << "Status: " << status << "\n";
 }

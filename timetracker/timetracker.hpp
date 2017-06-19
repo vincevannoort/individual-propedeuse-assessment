@@ -65,6 +65,7 @@ class Timetracker {
 private:
 	Fingerprintsensor & fps;
 	i2cRTClib & rtc;
+	hwlib::pin_in & checking_pin, & registering_pin, & storing_pin;
 
 	int status;
 	enum class status_data: int {
@@ -76,9 +77,9 @@ private:
 
 	Workday time_entries;
 public:
-	Timetracker(Fingerprintsensor & fps, i2cRTClib & rtc, Time initial_time);
+	Timetracker(Fingerprintsensor & fps, i2cRTClib & rtc, hwlib::pin_in & checking_pin, hwlib::pin_in & registering_pin, hwlib::pin_in & storing_pin, Time initial_time);
 	void start_tracking();
-	// void initialise(Time t = Time( 0, 0, 0, 23, 5, 2017 ));
+	void check_buttons_and_store_status();
 };
 
 #endif

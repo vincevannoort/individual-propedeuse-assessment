@@ -38,6 +38,9 @@ int main() {
 	/*
 	Timetracker
 	*/
-	Timetracker timetracker( fingerprintsensor, realtimeclock, Time( 0, 0, 0, 0, 23, 5, 2017 ));
+	auto checking_pin = hwlib::target::pin_in( hwlib::target::pins::d11 );
+	auto registering_pin = hwlib::target::pin_in( hwlib::target::pins::d12 );
+	auto storing_pin = hwlib::target::pin_in( hwlib::target::pins::d13 );
+	Timetracker timetracker( fingerprintsensor, realtimeclock, checking_pin, registering_pin, storing_pin, Time( 0, 0, 0, 0, 23, 5, 2017 ));
 	timetracker.start_tracking();
 }
