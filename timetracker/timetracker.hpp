@@ -9,14 +9,33 @@ typedef uint8_t byte;
 typedef int16_t word;
 typedef int32_t double_word;
 
+/*
+Employee
+*/
+class Employee {
+private:
+	char[20] first_name;
+	char[30] last_name;
+public:
+	Employee(char[20] first_name, char[30] last_name, byte hours_worked);
+	char[50] get_name();
+	void set_hours_worked();
+	int get_hours_worked();
+}
+
+/*
+Time
+*/
 class Time {
 private:
-	uint8_t seconds;
-	uint8_t minutes;
-	uint8_t hours;
-	uint8_t date;
-	uint8_t month;
-	uint16_t year;
+	byte seconds;
+	byte minutes;
+	byte hours;
+	byte date;
+	byte month;
+	word year;
+public:
+	Time(byte seconds, byte minutes, byte hours, byte date, byte month, word year)
 }
 
 /*
@@ -26,17 +45,23 @@ class Workday {
 private:
 	Time start_time;
 	Time end_time;
+	Employee employee_of_workday;
 public:
 	Workday();
-	void start_day();
-	void end_day();
-	uint_fast64_t calculate_milliseconds();
+	void start_day(Time t);
+	void end_day(Time t);
+	uint_fast64_t calculate_work_time();
 };
 
 /*
 Timetracker
 */
 class Timetracker {
+private:
+	Employee employees[20];
+	Workday workdays_from_each_employee;
+public:
+	Timetracker(Employee employees[20]);
 };
 
 #endif
