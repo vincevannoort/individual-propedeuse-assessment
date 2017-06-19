@@ -9,10 +9,10 @@
 #############################################################################
 
 # source files in this project (main.cpp is automatically assumed)
-SOURCES := fingerprintsensor/fingerprintsensor.cpp realtimeclock/realtimeclock.cpp
+SOURCES := fingerprintsensor/fingerprintsensor.cpp
 
 # header files in this project
-HEADERS := fingerprintsensor/fingerprintsensor.hpp realtimeclock/realtimeclock.hpp
+HEADERS := fingerprintsensor/fingerprintsensor.hpp realtimeclock/i2cRTC.hpp
 
 # other places to look for files for this project
 SEARCH  := 
