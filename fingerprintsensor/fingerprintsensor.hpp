@@ -138,7 +138,8 @@ public:
         
     public:
         Response_packet(int input_baud_rate);
-        double_word get_parameter();
+        double_word get_parameter_data();
+        word get_response_data();
         void recieve();
     };
 

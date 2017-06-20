@@ -4,7 +4,7 @@
 #include <cstring>
 #include "hwlib.hpp"
 
-#define debug 1
+#define debug 0
 #define ERROR_NO_VALID_RESPONSE -5
 
 /*
@@ -96,8 +96,12 @@ baud_rate(input_baud_rate)
     recieve();
 }
 
-double_word Fingerprintsensor::Response_packet::get_parameter() {
+double_word Fingerprintsensor::Response_packet::get_parameter_data() {
     return parameter;
+}
+
+word Fingerprintsensor::Response_packet::get_response_data() {
+    return response;
 }
 
 /// @brief Recieve command which polls for a response, then acquires the needed data
@@ -120,11 +124,7 @@ void Fingerprintsensor::Response_packet::recieve() {
     checksum = packet[10];
     checksum = (packet[11] << 8) | checksum;
 
-    // if (debug) {
-        // auto tx_pin = hwlib::target::pin_out( hwlib::target::pins::d14 );
-        // hwlib::uart_putc_bit_banged_pin_custom_baudrate('\n', tx_pin, baud_rate);
-        // hwlib::uart_putc_bit_banged_pin_custom_baudrate(packet[4], tx_pin, baud_rate);
-
+    if (debug) {
         switch( (double_word)parameter ) {
             case (double_word)Fingerprintsensor::response_packet_data::NO_ERROR:
                 hwlib::cout << "NO_ERROR" << "\n"; break;
@@ -169,7 +169,7 @@ void Fingerprintsensor::Response_packet::recieve() {
             default:
                 hwlib::cout << "\f" << "NOTHING" << "\n";
         }
-    // }
+    }
 }
 
 /*
@@ -211,7 +211,7 @@ int Fingerprintsensor::change_baud_rate(int input_baud_rate) {
     baud_rate = input_baud_rate;
 
     if (debug) {
-        hwlib::cout << "Baud rate: " << baud_rate << " checksum = " << command_packet.calculate_checksum();
+        hwlib::cout << "Baud rate" << "\n";
     }
     return 0;
 }
@@ -225,7 +225,7 @@ int Fingerprintsensor::get_enrolled_fingerprint_count() {
         hwlib::cout << "Get count" << "\n";
     } 
 
-    return response_packet.get_parameter();
+    return response_packet.get_parameter_data();
 }
 
 /// @brief Check status of fingerprint id
@@ -251,11 +251,11 @@ int Fingerprintsensor::start_enrollment() {
         hwlib::cout << "Start enrollment" << "\n";
     }
 
-    if (response_packet.get_parameter() == (double_word) response_packet_data::NO_ERROR) {
+    if (response_packet.get_response_data() == (double_word) command_packet_data::Ack) {
         return input_parameter;
-    } else if (response_packet.get_parameter() == (double_word) response_packet_data::NACK_DB_IS_FULL 
-        || response_packet.get_parameter() == (double_word) response_packet_data::NACK_INVALID_POS 
-        || response_packet.get_parameter() == (double_word) response_packet_data::NACK_IS_ALREADY_USED) {
+    } else if (response_packet.get_parameter_data() == (double_word) response_packet_data::NACK_DB_IS_FULL 
+        || response_packet.get_parameter_data() == (double_word) response_packet_data::NACK_INVALID_POS 
+        || response_packet.get_parameter_data() == (double_word) response_packet_data::NACK_IS_ALREADY_USED) {
         return -1;
     } else { return ERROR_NO_VALID_RESPONSE; }
 }
@@ -278,10 +278,10 @@ int Fingerprintsensor::enrollment(int template_number) {
         hwlib::cout << "Enrollment" << "\n";
     }
 
-    if (response_packet.get_parameter() == (double_word) response_packet_data::NO_ERROR) {
+    if (response_packet.get_response_data() == (double_word) command_packet_data::Ack) {
         return 1;
-    } else if (response_packet.get_parameter() == (double_word) response_packet_data::NACK_ENROLL_FAILED 
-        || response_packet.get_parameter() == (double_word) response_packet_data::NACK_BAD_FINGER) {
+    } else if (response_packet.get_parameter_data() == (double_word) response_packet_data::NACK_ENROLL_FAILED 
+        || response_packet.get_parameter_data() == (double_word) response_packet_data::NACK_BAD_FINGER) {
         return -1;
     } else { return ERROR_NO_VALID_RESPONSE; }
     return 0;
@@ -295,7 +295,7 @@ int Fingerprintsensor::check_finger_pressing_status() {
     if (debug) {
         hwlib::cout << "Check fingerpress" << "\n";
     }
-    return response_packet.get_parameter();
+    return response_packet.get_parameter_data();
 }
 
 /// @brief Delete one fingerprint based on a id
@@ -307,7 +307,7 @@ int Fingerprintsensor::delete_one_fingerprint(int id) {
     if (debug) {
         hwlib::cout << "Delete one fingerprint" << "\n";
     }
-    return response_packet.get_parameter();
+    return response_packet.get_parameter_data();
 }
 
 /// @brief Delete one fingerprint based on a id
@@ -319,9 +319,9 @@ int Fingerprintsensor::delete_all_fingerprints() {
     if (debug) {
         hwlib::cout << "Delete all fingerprints" << "\n";
     }
-    if (response_packet.get_parameter() == (double_word) response_packet_data::NO_ERROR) {
+    if (response_packet.get_response_data() == (double_word) command_packet_data::Ack) {
         return 1;
-    } else if (response_packet.get_parameter() == (double_word) response_packet_data::NACK_DB_IS_EMPTY) {
+    } else if (response_packet.get_parameter_data() == (double_word) response_packet_data::NACK_DB_IS_EMPTY) {
         return -1;
     } else { return ERROR_NO_VALID_RESPONSE; }
 }
@@ -336,11 +336,11 @@ int Fingerprintsensor::verification_1_1(int id) {
         hwlib::cout << "Verification 1:1" << "\n";
     }
 
-    if (response_packet.get_parameter() == (double_word) response_packet_data::NO_ERROR) {
+    if (response_packet.get_response_data() == (double_word) command_packet_data::Ack) {
         return 1;
-    } else if (response_packet.get_parameter() == (double_word) response_packet_data::NACK_INVALID_POS 
-        || response_packet.get_parameter() == (double_word) response_packet_data::NACK_IS_NOT_USED
-        || response_packet.get_parameter() == (double_word) response_packet_data::NACK_VERIFY_FAILED) {
+    } else if (response_packet.get_parameter_data() == (double_word) response_packet_data::NACK_INVALID_POS 
+        || response_packet.get_parameter_data() == (double_word) response_packet_data::NACK_IS_NOT_USED
+        || response_packet.get_parameter_data() == (double_word) response_packet_data::NACK_VERIFY_FAILED) {
         return -1;
     } else { return ERROR_NO_VALID_RESPONSE; }
 }
@@ -352,27 +352,13 @@ int Fingerprintsensor::identification_1_N() {
 
 
     if (debug) {
-        hwlib::cout << "Verification 1:N" << "\n";
+        hwlib::cout << "Identification 1:N" << "\n";
     }
 
-    // hwlib::cout << "IDENTIFYING! - " 
-    // << "[" << hwlib::hex << response_packet.packet[4] << hwlib::dec << "]" 
-    // << "[" << hwlib::hex << response_packet.packet[5] << hwlib::dec << "]" 
-    // << "[" << hwlib::hex << response_packet.packet[6] << hwlib::dec << "]" 
-    // << "[" << hwlib::hex << response_packet.packet[7] << hwlib::dec << "]" << "\n";
-    // auto tx_pin_extra = hwlib::target::pin_out( hwlib::target::pins::d14 );
-    
-    auto tx_pin = hwlib::target::pin_out( hwlib::target::pins::d14 );
-    hwlib::uart_putc_bit_banged_pin_custom_baudrate('\n', tx_pin, baud_rate);
-    for (int i = 0; i < 12; i++) {
-        hwlib::uart_putc_bit_banged_pin_custom_baudrate(packet[i], tx_pin, baud_rate);
-    }
-
-    if (response_packet.get_parameter() == (double_word) response_packet_data::NO_ERROR) {
-        hwlib::cout << "IDENTIFIED: " << (response_packet.packet[4]) << "\n";
-        return response_packet.packet[4];
-    } else if (response_packet.get_parameter() == (double_word) response_packet_data::NACK_IDENTIFY_FAILED 
-        || response_packet.get_parameter() == (double_word) response_packet_data::NACK_DB_IS_EMPTY) {
+    if (response_packet.get_response_data() == (double_word) command_packet_data::Ack) {
+        return (int) response_packet.get_parameter_data();
+    } else if (response_packet.get_parameter_data() == (double_word) response_packet_data::NACK_IDENTIFY_FAILED 
+        || response_packet.get_parameter_data() == (double_word) response_packet_data::NACK_DB_IS_EMPTY) {
         return -1;
     } else { return ERROR_NO_VALID_RESPONSE; }
 }
@@ -393,9 +379,9 @@ int Fingerprintsensor::capture_fingerprint(const char* quality) {
         hwlib::cout << "Capture" << "\n";
     }
 
-    if (response_packet.get_parameter() == (double_word) response_packet_data::NO_ERROR) {
+    if (response_packet.get_response_data() == (double_word) command_packet_data::Ack) {
         return 1;
-    } else if (response_packet.get_parameter() == (double_word) response_packet_data::NACK_FINGER_IS_NOT_PRESSED) {
+    } else if (response_packet.get_parameter_data() == (double_word) response_packet_data::NACK_FINGER_IS_NOT_PRESSED) {
         return -1;
     } else { return ERROR_NO_VALID_RESPONSE; }
 }
@@ -409,7 +395,7 @@ int Fingerprintsensor::terminate() {
         hwlib::cout << "Terminate" << "\n";
     }
 
-    if (response_packet.get_parameter() == (double_word) response_packet_data::NO_ERROR) {
+    if (response_packet.get_response_data() == (double_word) command_packet_data::Ack) {
         return 1;
     } else { return ERROR_NO_VALID_RESPONSE; }
 }
