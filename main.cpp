@@ -16,10 +16,17 @@ int main() {
 	auto rx_pin = hwlib::target::pin_in( hwlib::target::pins::d19 );
  	Fingerprintsensor fingerprintsensor(tx_pin, rx_pin);
 	fingerprintsensor.initialise();
-	// while(1) {
-	// 	fingerprintsensor.control_led(true);
-	// 	fingerprintsensor.control_led(false);
-	// }
+	// fingerprintsensor.delete_all_fingerprints();
+	// fingerprintsensor.register_fingerprint();
+	hwlib::wait_ms(1000);
+	// fingerprintsensor.register_fingerprint();
+	int i = 0;
+	while(1) {
+		// fingerprintsensor.control_led(true);
+		// fingerprintsensor.control_led(false);
+		int ret_val = fingerprintsensor.identify_fingerprint_try_check_finger_pressing_status_once();
+		hwlib::cout << "try " << i++ << ": " << ret_val << "\n";
+	}
 
 	/*
 	Realtimeclock
@@ -42,5 +49,5 @@ int main() {
 	auto registering_pin = hwlib::target::pin_in( hwlib::target::pins::d12 );
 	auto storing_pin = hwlib::target::pin_in( hwlib::target::pins::d13 );
 	Timetracker timetracker( fingerprintsensor, realtimeclock, checking_pin, registering_pin, storing_pin, Time( 0, 0, 0, 0, 23, 5, 2017 ));
-	timetracker.start_tracking();
+	// timetracker.start_tracking();
 }

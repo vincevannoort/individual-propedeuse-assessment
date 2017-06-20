@@ -4,7 +4,8 @@
 #include <cstring>
 #include "hwlib.hpp"
 
-#define debug 0
+#define debug 1
+#define ERROR_NO_VALID_RESPONSE -5
 
 /*
 Constructor & Deconstructor
@@ -95,7 +96,7 @@ baud_rate(input_baud_rate)
     recieve();
 }
 
-int Fingerprintsensor::Response_packet::get_parameter() {
+double_word Fingerprintsensor::Response_packet::get_parameter() {
     return parameter;
 }
 
@@ -119,67 +120,56 @@ void Fingerprintsensor::Response_packet::recieve() {
     checksum = packet[10];
     checksum = (packet[11] << 8) | checksum;
 
-    if (debug) {
-        auto tx_pin = hwlib::target::pin_out( hwlib::target::pins::d14 );
-        hwlib::uart_putc_bit_banged_pin_custom_baudrate('\n', tx_pin, baud_rate);
-        hwlib::uart_putc_bit_banged_pin_custom_baudrate(packet[4], tx_pin, baud_rate);
-
-        /*
-        Debugging OLED
-        */
-        hwlib::target::pin_oc scl                 = hwlib::target::pin_oc( hwlib::target::pins::scl );
-        hwlib::target::pin_oc sda                 = hwlib::target::pin_oc( hwlib::target::pins::sda );
-        hwlib::i2c_bus_bit_banged_scl_sda i2c_bus = hwlib::i2c_bus_bit_banged_scl_sda( scl, sda );
-        hwlib::glcd_oled oled                     = hwlib::glcd_oled( i2c_bus, 0x3c ); 
-
-        hwlib::font_default_8x8 font              = hwlib::font_default_8x8();
-        hwlib::window_ostream display             = hwlib::window_ostream( oled, font );
+    // if (debug) {
+        // auto tx_pin = hwlib::target::pin_out( hwlib::target::pins::d14 );
+        // hwlib::uart_putc_bit_banged_pin_custom_baudrate('\n', tx_pin, baud_rate);
+        // hwlib::uart_putc_bit_banged_pin_custom_baudrate(packet[4], tx_pin, baud_rate);
 
         switch( (double_word)parameter ) {
             case (double_word)Fingerprintsensor::response_packet_data::NO_ERROR:
-                display << "\f" << "NO_ERROR" << "\n" << hwlib::flush; break;
+                hwlib::cout << "NO_ERROR" << "\n"; break;
             case (double_word)Fingerprintsensor::response_packet_data::NACK_TIMEOUT:
-                display << "\f" << "TIMEOUT" << "\n" << hwlib::flush; break;
+                hwlib::cout << "TIMEOUT" << "\n"; break;
             case (double_word)Fingerprintsensor::response_packet_data::NACK_INVALID_BAUDRATE:
-                display << "\f" << "INVALID_BAUDRATE" << "\n" << hwlib::flush; break;
+                hwlib::cout << "INVALID_BAUDRATE" << "\n"; break;
             case (double_word)Fingerprintsensor::response_packet_data::NACK_INVALID_POS:
-                display << "\f" << "INVALID_POS" << "\n" << hwlib::flush; break;
+                hwlib::cout << "INVALID_POS" << "\n"; break;
             case (double_word)Fingerprintsensor::response_packet_data::NACK_IS_NOT_USED:
-                display << "\f" << "IS_NOT_USED" << "\n" << hwlib::flush; break;
+                hwlib::cout << "IS_NOT_USED" << "\n"; break;
             case (double_word)Fingerprintsensor::response_packet_data::NACK_IS_ALREADY_USED:
-                display << "\f" << "IS_ALREADY_USED" << "\n" << hwlib::flush; break;
+                hwlib::cout << "IS_ALREADY_USED" << "\n"; break;
             case (double_word)Fingerprintsensor::response_packet_data::NACK_COMM_ERR:
-                display << "\f" << "COMM_ERR" << "\n" << hwlib::flush; break;
+                hwlib::cout << "COMM_ERR" << "\n"; break;
             case (double_word)Fingerprintsensor::response_packet_data::NACK_VERIFY_FAILED:
-                display << "\f" << "VERIFY_FAILED" << "\n" << hwlib::flush; break;
+                hwlib::cout << "VERIFY_FAILED" << "\n"; break;
             case (double_word)Fingerprintsensor::response_packet_data::NACK_IDENTIFY_FAILED:
-                display << "\f" << "IDENTIFY_FAILED" << "\n" << hwlib::flush; break;
+                hwlib::cout << "IDENTIFY_FAILED" << "\n"; break;
             case (double_word)Fingerprintsensor::response_packet_data::NACK_DB_IS_FULL:
-                display << "\f" << "DB_IS_FULL" << "\n" << hwlib::flush; break;
+                hwlib::cout << "DB_IS_FULL" << "\n"; break;
             case (double_word)Fingerprintsensor::response_packet_data::NACK_DB_IS_EMPTY:
-                display << "\f" << "DB_IS_EMPTY" << "\n" << hwlib::flush; break;
+                hwlib::cout << "DB_IS_EMPTY" << "\n"; break;
             case (double_word)Fingerprintsensor::response_packet_data::NACK_TURN_ERR:
-                display << "\f" << "TURN_ERR" << "\n" << hwlib::flush; break;
+                hwlib::cout << "TURN_ERR" << "\n"; break;
             case (double_word)Fingerprintsensor::response_packet_data::NACK_BAD_FINGER:
-                display << "\f" << "BAD_FINGER" << "\n" << hwlib::flush; break;
+                hwlib::cout << "BAD_FINGER" << "\n"; break;
             case (double_word)Fingerprintsensor::response_packet_data::NACK_ENROLL_FAILED:
-                display << "\f" << "ENROLL_FAILED" << "\n" << hwlib::flush; break;
+                hwlib::cout << "ENROLL_FAILED" << "\n"; break;
             case (double_word)Fingerprintsensor::response_packet_data::NACK_IS_NOT_SUPPORTED:
-                display << "\f" << "IS_NOT_SUPPORTED" << "\n" << hwlib::flush; break;
+                hwlib::cout << "IS_NOT_SUPPORTED" << "\n"; break;
             case (double_word)Fingerprintsensor::response_packet_data::NACK_DEV_ERR:
-                display << "\f" << "DEV_ERR" << "\n" << hwlib::flush; break;
+                hwlib::cout << "DEV_ERR" << "\n"; break;
             case (double_word)Fingerprintsensor::response_packet_data::NACK_CAPTURE_CANCELED:
-                display << "\f" << "CAPTURE_CANCELED" << "\n" << hwlib::flush; break;
+                hwlib::cout << "CAPTURE_CANCELED" << "\n"; break;
             case (double_word)Fingerprintsensor::response_packet_data::NACK_INVALID_PARAM:
-                display << "\f" << "INVALID_PARAM" << "\n" << hwlib::flush; break;
+                hwlib::cout << "INVALID_PARAM" << "\n"; break;
             case (double_word)Fingerprintsensor::response_packet_data::NACK_FINGER_IS_NOT_PRESSED:
-                display << "\f" << "FINGER_IS_NOT_PRESSED" << "\n" << hwlib::flush; break;
+                hwlib::cout << "FINGER_IS_NOT_PRESSED" << "\n"; break;
             case (double_word)Fingerprintsensor::response_packet_data::INVALID:
-                display << "\f" << "INVALID" << "\n" << hwlib::flush; break;
+                hwlib::cout << "INVALID" << "\n"; break;
             default:
-                display << "\f" << "Nothing" << "\n" << hwlib::flush;
+                hwlib::cout << "\f" << "NOTHING" << "\n";
         }
-    }
+    // }
 }
 
 /*
@@ -195,13 +185,6 @@ int Fingerprintsensor::initialise() {
         hwlib::cout << "Initialise" << "\n";
         hwlib::cout << TEST_check_initialise_command_packet(command_packet.packet) << "\n";
     } 
-
-    auto tx_pin_debug = hwlib::target::pin_out( hwlib::target::pins::d14 );
-    hwlib::uart_putc_bit_banged_pin_custom_baudrate('\n', tx_pin_debug, baud_rate);
-    hwlib::uart_putc_bit_banged_pin_custom_baudrate(command_packet.packet[4], tx_pin_debug, baud_rate);
-    hwlib::uart_putc_bit_banged_pin_custom_baudrate(command_packet.packet[5], tx_pin_debug, baud_rate);
-    hwlib::uart_putc_bit_banged_pin_custom_baudrate(command_packet.packet[6], tx_pin_debug, baud_rate);
-    hwlib::uart_putc_bit_banged_pin_custom_baudrate(command_packet.packet[7], tx_pin_debug, baud_rate);
     return 0;
 }
 
@@ -267,7 +250,14 @@ int Fingerprintsensor::start_enrollment() {
     if (debug) {
         hwlib::cout << "Start enrollment" << "\n";
     }
-    return 0;
+
+    if (response_packet.get_parameter() == (double_word) response_packet_data::NO_ERROR) {
+        return input_parameter;
+    } else if (response_packet.get_parameter() == (double_word) response_packet_data::NACK_DB_IS_FULL 
+        || response_packet.get_parameter() == (double_word) response_packet_data::NACK_INVALID_POS 
+        || response_packet.get_parameter() == (double_word) response_packet_data::NACK_IS_ALREADY_USED) {
+        return -1;
+    } else { return ERROR_NO_VALID_RESPONSE; }
 }
 
 /// @brief Function for each of the 3 enrollments based on the parameter
@@ -287,6 +277,13 @@ int Fingerprintsensor::enrollment(int template_number) {
     if (debug) {
         hwlib::cout << "Enrollment" << "\n";
     }
+
+    if (response_packet.get_parameter() == (double_word) response_packet_data::NO_ERROR) {
+        return 1;
+    } else if (response_packet.get_parameter() == (double_word) response_packet_data::NACK_ENROLL_FAILED 
+        || response_packet.get_parameter() == (double_word) response_packet_data::NACK_BAD_FINGER) {
+        return -1;
+    } else { return ERROR_NO_VALID_RESPONSE; }
     return 0;
 }
 
@@ -310,7 +307,7 @@ int Fingerprintsensor::delete_one_fingerprint(int id) {
     if (debug) {
         hwlib::cout << "Delete one fingerprint" << "\n";
     }
-    return 0;
+    return response_packet.get_parameter();
 }
 
 /// @brief Delete one fingerprint based on a id
@@ -322,7 +319,11 @@ int Fingerprintsensor::delete_all_fingerprints() {
     if (debug) {
         hwlib::cout << "Delete all fingerprints" << "\n";
     }
-    return 0;
+    if (response_packet.get_parameter() == (double_word) response_packet_data::NO_ERROR) {
+        return 1;
+    } else if (response_packet.get_parameter() == (double_word) response_packet_data::NACK_DB_IS_EMPTY) {
+        return -1;
+    } else { return ERROR_NO_VALID_RESPONSE; }
 }
 
 /// @brief Verify a fingerprint based on id
@@ -334,7 +335,14 @@ int Fingerprintsensor::verification_1_1(int id) {
     if (debug) {
         hwlib::cout << "Verification 1:1" << "\n";
     }
-    return 0;
+
+    if (response_packet.get_parameter() == (double_word) response_packet_data::NO_ERROR) {
+        return 1;
+    } else if (response_packet.get_parameter() == (double_word) response_packet_data::NACK_INVALID_POS 
+        || response_packet.get_parameter() == (double_word) response_packet_data::NACK_IS_NOT_USED
+        || response_packet.get_parameter() == (double_word) response_packet_data::NACK_VERIFY_FAILED) {
+        return -1;
+    } else { return ERROR_NO_VALID_RESPONSE; }
 }
 
 /// @brief Verify a fingerprint on all existing fingerprints
@@ -342,22 +350,31 @@ int Fingerprintsensor::identification_1_N() {
     Fingerprintsensor::Command_packet command_packet(0x00, ((word) command_packet_data::Identify1_N), baud_rate);
     Fingerprintsensor::Response_packet response_packet(baud_rate);
 
-    auto tx_pin = hwlib::target::pin_out( hwlib::target::pins::d14 );
-    hwlib::uart_putc_bit_banged_pin_custom_baudrate('\n', tx_pin, baud_rate);
-    hwlib::uart_putc_bit_banged_pin_custom_baudrate('\n', tx_pin, baud_rate);
-    hwlib::uart_putc_bit_banged_pin_custom_baudrate('\n', tx_pin, baud_rate);
-    hwlib::uart_putc_bit_banged_pin_custom_baudrate(response_packet.packet[4], tx_pin, baud_rate);
-    hwlib::uart_putc_bit_banged_pin_custom_baudrate(response_packet.packet[5], tx_pin, baud_rate);
-    hwlib::uart_putc_bit_banged_pin_custom_baudrate(response_packet.packet[6], tx_pin, baud_rate);
-    hwlib::uart_putc_bit_banged_pin_custom_baudrate(response_packet.packet[7], tx_pin, baud_rate);
-    hwlib::uart_putc_bit_banged_pin_custom_baudrate('\t', tx_pin, baud_rate);
-    hwlib::uart_putc_bit_banged_pin_custom_baudrate(response_packet.packet[8], tx_pin, baud_rate);
-    hwlib::uart_putc_bit_banged_pin_custom_baudrate(response_packet.packet[9], tx_pin, baud_rate);
 
     if (debug) {
         hwlib::cout << "Verification 1:N" << "\n";
     }
-    return 0;
+
+    // hwlib::cout << "IDENTIFYING! - " 
+    // << "[" << hwlib::hex << response_packet.packet[4] << hwlib::dec << "]" 
+    // << "[" << hwlib::hex << response_packet.packet[5] << hwlib::dec << "]" 
+    // << "[" << hwlib::hex << response_packet.packet[6] << hwlib::dec << "]" 
+    // << "[" << hwlib::hex << response_packet.packet[7] << hwlib::dec << "]" << "\n";
+    // auto tx_pin_extra = hwlib::target::pin_out( hwlib::target::pins::d14 );
+    
+    auto tx_pin = hwlib::target::pin_out( hwlib::target::pins::d14 );
+    hwlib::uart_putc_bit_banged_pin_custom_baudrate('\n', tx_pin, baud_rate);
+    for (int i = 0; i < 12; i++) {
+        hwlib::uart_putc_bit_banged_pin_custom_baudrate(packet[i], tx_pin, baud_rate);
+    }
+
+    if (response_packet.get_parameter() == (double_word) response_packet_data::NO_ERROR) {
+        hwlib::cout << "IDENTIFIED: " << (response_packet.packet[4]) << "\n";
+        return response_packet.packet[4];
+    } else if (response_packet.get_parameter() == (double_word) response_packet_data::NACK_IDENTIFY_FAILED 
+        || response_packet.get_parameter() == (double_word) response_packet_data::NACK_DB_IS_EMPTY) {
+        return -1;
+    } else { return ERROR_NO_VALID_RESPONSE; }
 }
 
 /// @brief Capture a fingerprint on the fingerprintsensor
@@ -375,7 +392,12 @@ int Fingerprintsensor::capture_fingerprint(const char* quality) {
     if (debug) {
         hwlib::cout << "Capture" << "\n";
     }
-    return 0;
+
+    if (response_packet.get_parameter() == (double_word) response_packet_data::NO_ERROR) {
+        return 1;
+    } else if (response_packet.get_parameter() == (double_word) response_packet_data::NACK_FINGER_IS_NOT_PRESSED) {
+        return -1;
+    } else { return ERROR_NO_VALID_RESPONSE; }
 }
 
 /// @brief Terminate/close the fingerprint sensor
@@ -386,33 +408,55 @@ int Fingerprintsensor::terminate() {
     if (debug) {
         hwlib::cout << "Terminate" << "\n";
     }
-    return 0;
+
+    if (response_packet.get_parameter() == (double_word) response_packet_data::NO_ERROR) {
+        return 1;
+    } else { return ERROR_NO_VALID_RESPONSE; }
 }
 
 /// @brief Identify a fingerprint according to the steps to take in the datasheet
 int Fingerprintsensor::identify_fingerprint() {
     auto green_led = hwlib::target::pin_out( hwlib::target::pins::d4 );
     auto red_led = hwlib::target::pin_out( hwlib::target::pins::d5 );
+    int identification_id;
 
     red_led.set(1);
     control_led(true);
     while (check_finger_pressing_status()) {}
     capture_fingerprint("best");
-    identification_1_N();
+    identification_id = identification_1_N();
     control_led(false);
     green_led.set(1);
     green_led.set(0); red_led.set(0);
 
     if (debug) {
-        hwlib::cout << "Identy fingerprint" << "\n";
+        hwlib::cout << "Identify fingerprint" << "\n";
     }
-    return 0;
+    return identification_id;
+}
+
+/// @brief Identify a fingerprint for one try according to the steps to take in the datasheet
+int Fingerprintsensor::identify_fingerprint_try_check_finger_pressing_status_once() {
+    int identification_id = -1;
+
+    control_led(true);
+    if (!check_finger_pressing_status()) {
+        capture_fingerprint("best");
+        identification_id = identification_1_N();
+    }
+    control_led(false);
+
+    if (debug) {
+        hwlib::cout << "Identify fingerprint once" << "\n";
+    }
+    return identification_id;
 }
 
 /// @brief Register a fingerprint according to the steps to take in the datasheet
 int Fingerprintsensor::register_fingerprint() {
     auto green_led = hwlib::target::pin_out( hwlib::target::pins::d4 );
     auto red_led = hwlib::target::pin_out( hwlib::target::pins::d5 );
+    // int registration_id = 
     start_enrollment();
 
     red_led.set(1);
@@ -424,7 +468,7 @@ int Fingerprintsensor::register_fingerprint() {
     while (!check_finger_pressing_status()) {}
     green_led.set(0); red_led.set(0);
 
-    hwlib::wait_ms(300);
+    hwlib::wait_ms(50);
 
     red_led.set(1);
     while (check_finger_pressing_status()) {}
@@ -434,7 +478,7 @@ int Fingerprintsensor::register_fingerprint() {
     while (!check_finger_pressing_status()) {}
     green_led.set(0); red_led.set(0);
 
-    hwlib::wait_ms(300);
+    hwlib::wait_ms(50);
     
     red_led.set(1);
     while (check_finger_pressing_status()) {}

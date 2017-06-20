@@ -138,7 +138,7 @@ public:
         
     public:
         Response_packet(int input_baud_rate);
-        int get_parameter();
+        double_word get_parameter();
         void recieve();
     };
 
@@ -167,6 +167,7 @@ public:
     Control functions
     */
     int identify_fingerprint();
+    int identify_fingerprint_try_check_finger_pressing_status_once();
     int register_fingerprint();
 };
 
