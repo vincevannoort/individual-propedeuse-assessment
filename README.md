@@ -12,7 +12,7 @@ The timetracking library uses the fingerprint- and realtimeclock library for aut
 ```auto tx_pin = hwlib::target::pin_out( hwlib::target::pins::d18 );
 auto rx_pin = hwlib::target::pin_in( hwlib::target::pins::d19 );
 Fingerprintsensor fingerprintsensor(tx_pin, rx_pin);
-fingerprintsensor.initialise();'''
+fingerprintsensor.initialise();```
 
 ## Example for the realtimeclock
 ```auto scl = due::pin_oc( hwlib::target::pins::d8 );   
