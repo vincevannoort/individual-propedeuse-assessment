@@ -1,5 +1,5 @@
-# Indiviual Propedeuse Assessment
-For my last project of the first year of my study, i decided to make a timeregistration system. Combining the GT-511C1R (fingerprintscanner) and the DS1307 (realtimeclock) i mananaged to build a working system. The main goal of the project was writing a library for the GT-511C1R, which should be reusable for students next year. The whole project is based upon a close to hardware library called 'hwlib', build by Wouter van Ooijen.
+# Individual Propedeuse Assessment
+For my last project of the first year of my study, i decided to make a timeregistration system. Combining the GT-511C1R (fingerprintscanner) and the DS1307 (realtimeclock) i managed to build a working system. The main goal of the project was writing a library for the GT-511C1R, which should be reusable for students next year. The whole project is based upon a close to hardware library called 'hwlib', build by Wouter van Ooijen.
 
 Things included:
 - GT-511C1R library (written by myself)
