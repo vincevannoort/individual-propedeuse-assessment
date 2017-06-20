@@ -7,9 +7,9 @@
 #define debug 0
 #define ERROR_NO_VALID_RESPONSE -5
 
-/*
-Constructor & Deconstructor
-*/
+/* ==========================================================================================================================
+Constructor, Deconstructor, Command packets & Response packets
+*/ // =======================================================================================================================
 
 /// @brief Constructor without parameters for testing purposes
 Fingerprintsensor::Fingerprintsensor(): tx(hwlib::pin_out_dummy), rx(hwlib::pin_in_dummy) { hwlib::wait_ms(200); }
@@ -172,9 +172,9 @@ void Fingerprintsensor::Response_packet::recieve() {
     }
 }
 
-/*
+/* ==========================================================================================================================
 Communication Commands functions
-*/
+*/ // =======================================================================================================================
 
 /// @brief Initialise the fingerprint sensor
 int Fingerprintsensor::initialise() {
@@ -399,6 +399,10 @@ int Fingerprintsensor::terminate() {
         return 1;
     } else { return ERROR_NO_VALID_RESPONSE; }
 }
+
+/* ==========================================================================================================================
+Control Commands functions
+*/ // =======================================================================================================================
 
 /// @brief Identify a fingerprint according to the steps to take in the datasheet
 int Fingerprintsensor::identify_fingerprint() {

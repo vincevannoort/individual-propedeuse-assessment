@@ -147,7 +147,7 @@ public:
     class Data_packet {};
 
     /*
-    Commando functions
+    Communication functions
     */
     int initialise();
     int control_led(bool on);
