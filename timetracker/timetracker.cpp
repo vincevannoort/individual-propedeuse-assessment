@@ -2,14 +2,14 @@
 #include "timetracker.hpp"
 #include "hwlib.hpp"
 
-/*
+/* ==========================================================================================================================
 Employee
-*/
+*/ // =======================================================================================================================
 
 
-/*
+/* ==========================================================================================================================
 Workday
-*/
+*/ // =======================================================================================================================
 Workday::Workday(){}
 
 // @brief Set start time of current workday
@@ -27,9 +27,9 @@ uint_fast64_t Workday::calculate_work_time() {
 	return 0; // end_time - start_time;
 }
 
-/*
+/* ==========================================================================================================================
 Time
-*/
+*/ // =======================================================================================================================
 
 // @brief Empty constructor for time
 Time::Time():
@@ -39,9 +39,9 @@ seconds(0), minutes(0), hours(0), day(0), date(0), month(0), year(2000) {}
 Time::Time(byte seconds, byte minutes, byte hours, byte day, byte date, byte month, word year):
 seconds(seconds), minutes(minutes), hours(hours), day(day), date(date), month(month), year(year) {}
 
-/*
+/* ==========================================================================================================================
 Timetracker
-*/
+*/ // =======================================================================================================================
 
 // @brief Constructor for the timetracker
 Timetracker::Timetracker(Fingerprintsensor & fps, i2cRTClib & rtc, hwlib::pin_in & checking_pin, hwlib::pin_in & registering_pin, hwlib::pin_in & storing_pin, Time initial_time):
