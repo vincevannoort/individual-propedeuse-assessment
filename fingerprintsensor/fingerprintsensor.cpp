@@ -5,6 +5,7 @@
 #include "hwlib.hpp"
 
 #define debug 0
+#define testing 1
 #define ERROR_NO_VALID_RESPONSE -5
 
 /* ==========================================================================================================================
@@ -183,8 +184,11 @@ int Fingerprintsensor::initialise() {
 
     if (debug) {
         hwlib::cout << "Initialise" << "\n";
-        hwlib::cout << TEST_check_initialise_command_packet(command_packet.packet) << "\n";
-    } 
+    }
+    if (testing) {
+        TEST_check_initialise_command_packet(command_packet.packet);
+        TEST_check_initialise_response_packet(response_packet.packet);
+    }
     return 0;
 }
 
@@ -200,6 +204,16 @@ int Fingerprintsensor::control_led(bool on) {
     if (debug) {
         hwlib::cout << "Control led" << "\n";
     } 
+
+    if (testing) {
+        if (on) {
+            TEST_check_led_on_command_packet(command_packet.packet);
+            TEST_check_led_on_response_packet(response_packet.packet);
+        } else {
+            TEST_check_led_off_command_packet(command_packet.packet);
+            TEST_check_led_off_response_packet(response_packet.packet);
+        }
+    }
     return 0;
 }
 
