@@ -16,17 +16,17 @@ int main() {
 	auto rx_pin = hwlib::target::pin_in( hwlib::target::pins::d19 );
  	Fingerprintsensor fingerprintsensor(tx_pin, rx_pin);
 	fingerprintsensor.initialise();
+	fingerprintsensor.control_led(true);
+	hwlib::wait_ms(1000);
+	fingerprintsensor.control_led(false);
 	// fingerprintsensor.delete_all_fingerprints();
 	// fingerprintsensor.register_fingerprint();
-	hwlib::wait_ms(1000);
-	// fingerprintsensor.register_fingerprint();
-	int i = 0;
-	while(1) {
-		// fingerprintsensor.control_led(true);
-		// fingerprintsensor.control_led(false);
-		int ret_val = fingerprintsensor.identify_fingerprint_try_check_finger_pressing_status_once();
-		hwlib::cout << "try " << i++ << ": " << ret_val << "\n";
-	}
+	// hwlib::wait_ms(1000);
+	// int i = 0;
+	// while(1) {
+	// 	int ret_val = fingerprintsensor.identify_fingerprint_try_check_finger_pressing_status_once();
+	// 	hwlib::cout << "try " << i++ << ": " << ret_val << "\n";
+	// }
 
 	/*
 	Realtimeclock
@@ -34,7 +34,7 @@ int main() {
 	auto scl = due::pin_oc( hwlib::target::pins::d8 ); 	
 	auto sda = due::pin_oc( hwlib::target::pins::d9 );
 	auto i2c = hwlib::i2c_bus_bit_banged_scl_sda( scl, sda );
-	i2cRTClib realtimeclock(i2c,2,4,2,7,5,12,16);
+	i2cRTClib realtimeclock(i2c, 0, 0, 0, 0, 23, 5, 2017);
 	// hwlib::wait_ms(1000);
 	// hwlib::cout << "Start checking!\n";
 	// while(1) {

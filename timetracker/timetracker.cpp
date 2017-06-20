@@ -55,9 +55,12 @@ void Timetracker::start_tracking() {
 		check_buttons_and_store_status();
 		
 		if (status == (int)Timetracker::status_data::Checking) {
-			// if ()
+			int checked_id = fps.identify_fingerprint_try_check_finger_pressing_status_once();
+			if (checked_id >= 0) {
+				hwlib::cout << "Welkom werknemer - " << checked_id << "\n";
+			}
 		} else if (status == (int)Timetracker::status_data::Registering) {
-			fps.register_fingerprint();
+			// fps.register_fingerprint();
 		} else if (status == (int)Timetracker::status_data::Identifying) {
 
 		} else if (status == (int)Timetracker::status_data::StoringData) {
@@ -68,10 +71,13 @@ void Timetracker::start_tracking() {
 
 // @brief Check each button and set the state of the timetracker
 void Timetracker::check_buttons_and_store_status() {
+	int old_status = status;
 
 	while(!checking_pin.get()) { status = (int)Timetracker::status_data::Checking; }
 	while(!registering_pin.get()) { status = (int)Timetracker::status_data::Registering; }
 	while(!storing_pin.get()) { status = (int)Timetracker::status_data::StoringData; }
 
-	hwlib::cout << "Status: " << status << "\n";
+	if (old_status != status) {
+		hwlib::cout << "Status changed: " << status << " | " << "Current time: " << rtc.get_uren() << ":" << rtc.get_minuten() << ":" << rtc.get_seconden() << "\n";
+	}
 }
