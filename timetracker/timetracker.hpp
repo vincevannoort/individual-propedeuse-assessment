@@ -51,7 +51,7 @@ public:
 	Workday();
 	void start_day(Time t);
 	void end_day(Time t);
-	uint_fast64_t calculate_work_time();
+	Time calculate_work_time();
 };
 
 /*

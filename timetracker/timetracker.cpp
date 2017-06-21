@@ -40,7 +40,7 @@ void Workday::end_day(Time t) {
 }
 
 // @brief Calculate hours worked
-uint_fast64_t Workday::calculate_work_time() {
+Time Workday::calculate_work_time() {
 	return end_time - start_time; // end_time - start_time;
 }
 
@@ -65,7 +65,7 @@ Time Time::operator-( const Time & rhs ) const {
         --difference_minutes;
         difference_seconds += 60;
     }
-    if(minutes > rhs.minutes) {
+    if(minutes < rhs.minutes) {
         --difference_hours;
         difference_minutes += 60;
     }
@@ -112,7 +112,8 @@ void Timetracker::start_tracking() {
 		} else if (status == (int)Timetracker::status_data::StoringData) {
 			for(Workday entry : time_entries) {
 				if (entry.start_time.year != 2000 && entry.end_time.year != 2000) {
-					hwlib::cout << "Time entry from " << entry.employee_of_workday.first_name << ", worked for: " << hwlib::setfill('0') << hwlib::setw(2) << rtc.get_uren() << ":" << hwlib::setfill('0') << hwlib::setw(2) << rtc.get_minuten() << ":" << hwlib::setfill('0') << hwlib::setw(2) << rtc.get_seconden() << "\n";
+					Time worked = entry.calculate_work_time();
+					hwlib::cout << "Time entry from " << entry.employee_of_workday.first_name << ", worked for: " << hwlib::setfill('0') << hwlib::setw(2) << (int)worked.hours << ":" << hwlib::setfill('0') << hwlib::setw(2) << (int)worked.minutes << ":" << hwlib::setfill('0') << hwlib::setw(2) << (int)worked.seconds << "\n";
 				}
 			}
 			status = (int)Timetracker::status_data::Checking;
@@ -136,7 +137,7 @@ void Timetracker::check_buttons_and_store_status() {
 
 // @brief Display the change of status with the current time included
 void Timetracker::display_change_status(int status) {
-	hwlib::cout << "Status changed: " << status << " | " << "Current time: " << rtc.get_uren() << ":" << rtc.get_minuten() << ":" << rtc.get_seconden() << "\n";
+	hwlib::cout << "Status changed: " << status << "\n";
 }
 
 // @brief Get current time from the rtc and give the time back as a Time class
