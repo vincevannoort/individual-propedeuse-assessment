@@ -1,3 +1,4 @@
+#include "hwlib.hpp"
 #include "GT511C1R.hpp"
 
 // Test 1: Check if initialise command packet contains the right bits to send
