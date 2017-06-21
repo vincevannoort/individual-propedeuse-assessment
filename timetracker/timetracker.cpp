@@ -61,7 +61,7 @@ Timetracker
 */ // =======================================================================================================================
 
 // @brief Constructor for the timetracker
-Timetracker::Timetracker(Fingerprintsensor & fps, i2cRTClib & rtc, hwlib::pin_in & checking_pin, hwlib::pin_in & registering_pin, hwlib::pin_in & storing_pin, Time initial_time):
+Timetracker::Timetracker(fingeprintsensor_interface * fps, i2cRTClib & rtc, hwlib::pin_in & checking_pin, hwlib::pin_in & registering_pin, hwlib::pin_in & storing_pin, Time initial_time):
 fps(fps), rtc(rtc), checking_pin(checking_pin), registering_pin(registering_pin), storing_pin(storing_pin), status(0) {
 	rtc.set_time(initial_time.seconds, initial_time.minutes, initial_time.hours, initial_time.day, initial_time.date, initial_time.month, initial_time.year);
 }
@@ -72,7 +72,7 @@ void Timetracker::start_tracking() {
 		check_buttons_and_store_status();
 		
 		if (status == (int)Timetracker::status_data::Checking) {
-			int checked_id = fps.identify_fingerprint_try_check_finger_pressing_status_once();
+			int checked_id = fps->identify_fingerprint_try_check_finger_pressing_status_once();
 			if (checked_id >= 0) {
 				if (time_entries[checked_id].start_time.year == 2000) { // year 2000 means it is not set
 					hwlib::cout << "Goodmorning " << time_entries[checked_id].employee_of_workday.first_name << " [" << checked_id << "]" << ", current time: " << hwlib::setfill('0') << hwlib::setw(2) << rtc.get_uren() << ":" << hwlib::setfill('0') << hwlib::setw(2) << rtc.get_minuten() << ":" << hwlib::setfill('0') << hwlib::setw(2) << rtc.get_seconden() << "\n";
@@ -86,7 +86,7 @@ void Timetracker::start_tracking() {
 				hwlib::wait_ms(1000);
 			}
 		} else if (status == (int)Timetracker::status_data::Registering) {
-			fps.register_fingerprint();
+			fps->register_fingerprint();
 			status = (int)Timetracker::status_data::Checking;
 			display_change_status(status);
 		} else if (status == (int)Timetracker::status_data::StoringData) {

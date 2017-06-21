@@ -1,4 +1,4 @@
-#include "fingerprintsensor.hpp"
+#include "GT511C1R.hpp"
 
 // Test 1: Check if initialise command packet contains the right bits to send
 bool TEST_check_initialise_command_packet(byte command_packet[12]) {
