@@ -13,12 +13,12 @@ Constructor, Deconstructor, Command packets & Response packets
 */ // =======================================================================================================================
 
 /// @brief Constructor without parameters for testing purposes
-GT511C1R::GT511C1R(): tx(hwlib::pin_out_dummy), rx(hwlib::pin_in_dummy) { hwlib::wait_ms(200); }
+GT511C1R::GT511C1R(): tx(hwlib::pin_out_dummy), rx(hwlib::pin_in_dummy) { hwlib::wait_ms(200); initialise(); }
 
 /// @brief Constructor for GT511C1R
 /// @param hwlib::pin_out & tx, pin used for sending data/commands
 /// @param hwlib::pin_in & rx, pin used for recieving data/commands
-GT511C1R::GT511C1R(hwlib::pin_out & tx, hwlib::pin_in & rx): tx(tx), rx(rx) { hwlib::wait_ms(200); }
+GT511C1R::GT511C1R(hwlib::pin_out & tx, hwlib::pin_in & rx): tx(tx), rx(rx) { hwlib::wait_ms(200); initialise(); }
 
 /// @brief Deconstructor for GT511C1R, terminates when program ends
 GT511C1R::~GT511C1R(){ /* terminate(); */ }

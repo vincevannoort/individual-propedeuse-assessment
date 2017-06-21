@@ -14,7 +14,6 @@ int main() {
 	auto tx_pin = hwlib::target::pin_out( hwlib::target::pins::d18 );
 	auto rx_pin = hwlib::target::pin_in( hwlib::target::pins::d19 );
  	GT511C1R fingerprintsensor(tx_pin, rx_pin);
-	fingerprintsensor.initialise();
 	fingerprintsensor.control_led(true);
 	hwlib::wait_ms(1000);
 	fingerprintsensor.control_led(false);
