@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "hwlib.hpp"
+#include "fingerprintsensor-interface.hpp"
 
 using namespace std;
 typedef uint8_t byte;
@@ -13,7 +14,7 @@ typedef int32_t double_word;
 GT511C1R
 */
 // @brief Class for the GT-511C1R fingeprintsensor
-class GT511C1R {
+class GT511C1R : public fingeprintsensor_interface {
 public:
     /*
     Constructor
