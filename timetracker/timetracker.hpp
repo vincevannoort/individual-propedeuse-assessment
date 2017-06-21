@@ -46,7 +46,7 @@ public:
 Workday
 */
 class Workday {
-private:
+public:
 	Time start_time;
 	Time end_time;
 	// Employee employee_of_workday;
@@ -74,11 +74,12 @@ private:
 		StoringData = 3,
 	};
 
-	Workday time_entries;
+	Workday time_entries[20];
 public:
 	Timetracker(Fingerprintsensor & fps, i2cRTClib & rtc, hwlib::pin_in & checking_pin, hwlib::pin_in & registering_pin, hwlib::pin_in & storing_pin, Time initial_time);
 	void start_tracking();
 	void check_buttons_and_store_status();
+	Time get_current_time_as_time_class();
 };
 
 #endif

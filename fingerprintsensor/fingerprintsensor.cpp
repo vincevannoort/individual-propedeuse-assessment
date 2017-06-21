@@ -5,7 +5,7 @@
 #include "hwlib.hpp"
 
 #define debug 0
-#define testing 1
+#define testing 0
 #define ERROR_NO_VALID_RESPONSE -5
 
 /* ==========================================================================================================================

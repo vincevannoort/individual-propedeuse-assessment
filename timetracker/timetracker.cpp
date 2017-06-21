@@ -14,12 +14,12 @@ Workday::Workday(){}
 
 // @brief Set start time of current workday
 void Workday::start_day(Time t) {
-	start_time = Time( 0, 0, 0, 0, 23, 5, 2017 );
+	start_time = t;
 }
 
 // @brief Set end time of current workday
 void Workday::end_day(Time t) {
-	end_time = Time( 0, 0, 0, 0, 23, 5, 2017 );
+	end_time = t;
 }
 
 // @brief Calculate hours worked
@@ -57,7 +57,15 @@ void Timetracker::start_tracking() {
 		if (status == (int)Timetracker::status_data::Checking) {
 			int checked_id = fps.identify_fingerprint_try_check_finger_pressing_status_once();
 			if (checked_id >= 0) {
-				hwlib::cout << "Welkom werknemer - " << checked_id << "\n";
+				hwlib::cout << "Goedemorgen werknemer: " << checked_id << ", tijd: " << hwlib::setfill('0') << hwlib::setw(2) << rtc.get_uren() << ":" << hwlib::setfill('0') << hwlib::setw(2) << rtc.get_minuten() << ":" << hwlib::setfill('0') << hwlib::setw(2) << rtc.get_seconden() << "\n";
+				if (time_entries[checked_id].start_time.year == 2000) { // year 2000 means it is not set
+					time_entries[checked_id].start_day(get_current_time_as_time_class());
+					hwlib::cout << "set time!" << "\n";
+				} else if (time_entries[checked_id].end_time.year == 2000) { // year 2000 means it is not set
+					time_entries[checked_id].end_day(get_current_time_as_time_class());
+					hwlib::cout << "ended time!" << "\n";
+				}
+				hwlib::wait_ms(1000);
 			}
 		} else if (status == (int)Timetracker::status_data::Registering) {
 			// fps.register_fingerprint();
@@ -80,4 +88,9 @@ void Timetracker::check_buttons_and_store_status() {
 	if (old_status != status) {
 		hwlib::cout << "Status changed: " << status << " | " << "Current time: " << rtc.get_uren() << ":" << rtc.get_minuten() << ":" << rtc.get_seconden() << "\n";
 	}
+}
+
+// @brief Get current time from the rtc and give the time back as a Time class
+Time Timetracker::get_current_time_as_time_class() {
+	return Time(rtc.get_seconden(), rtc.get_minuten(), rtc.get_uren(), rtc.get_dag_week(), rtc.get_dag_maand(), rtc.get_maand(), rtc.get_jaar());
 }
