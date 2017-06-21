@@ -30,7 +30,7 @@ int main() {
 	auto checking_pin = hwlib::target::pin_in( hwlib::target::pins::d11 );
 	auto registering_pin = hwlib::target::pin_in( hwlib::target::pins::d12 );
 	auto storing_pin = hwlib::target::pin_in( hwlib::target::pins::d13 );
-	Timetracker timetracker(fingerprintsensor, realtimeclock, checking_pin, registering_pin, storing_pin, Time( 0, 0, 0, 0, 23, 5, 2017 ));
+	Timetracker timetracker(&fingerprintsensor, realtimeclock, checking_pin, registering_pin, storing_pin, Time( 0, 0, 0, 0, 23, 5, 2017 ));
 	Employee vince("Vince", sizeof("Vince"), "van Noort", sizeof("van Noort"));
 	Employee wouter("Wouter", sizeof("Wouter"), "van Ooijen", sizeof("van Ooijen"));
 	Employee joost("Joost", sizeof("Joost"), "Schalken", sizeof("Schalken"));
