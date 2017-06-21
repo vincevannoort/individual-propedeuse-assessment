@@ -1,11 +1,11 @@
-#include "fingerprintsensor.hpp"
+#include "GT511C1R.hpp"
 #include "unit_tests.hpp"
 
 #include <cstring>
 #include "hwlib.hpp"
 
 #define debug 0
-#define testing 0
+#define testing 1
 #define ERROR_NO_VALID_RESPONSE -5
 
 /* ==========================================================================================================================
@@ -13,22 +13,22 @@ Constructor, Deconstructor, Command packets & Response packets
 */ // =======================================================================================================================
 
 /// @brief Constructor without parameters for testing purposes
-Fingerprintsensor::Fingerprintsensor(): tx(hwlib::pin_out_dummy), rx(hwlib::pin_in_dummy) { hwlib::wait_ms(200); }
+GT511C1R::GT511C1R(): tx(hwlib::pin_out_dummy), rx(hwlib::pin_in_dummy) { hwlib::wait_ms(200); }
 
-/// @brief Constructor for Fingerprintsensor
+/// @brief Constructor for GT511C1R
 /// @param hwlib::pin_out & tx, pin used for sending data/commands
 /// @param hwlib::pin_in & rx, pin used for recieving data/commands
-Fingerprintsensor::Fingerprintsensor(hwlib::pin_out & tx, hwlib::pin_in & rx): tx(tx), rx(rx) { hwlib::wait_ms(200); }
+GT511C1R::GT511C1R(hwlib::pin_out & tx, hwlib::pin_in & rx): tx(tx), rx(rx) { hwlib::wait_ms(200); }
 
-/// @brief Deconstructor for Fingerprintsensor, terminates when program ends
-Fingerprintsensor::~Fingerprintsensor(){ /* terminate(); */ }
+/// @brief Deconstructor for GT511C1R, terminates when program ends
+GT511C1R::~GT511C1R(){ /* terminate(); */ }
 
 /*
 Constructors
 */
 
 /// @brief Constructor for Command packet
-Fingerprintsensor::Command_packet::Command_packet(double_word input_parameter, word input_command, int input_baud_rate):
+GT511C1R::Command_packet::Command_packet(double_word input_parameter, word input_command, int input_baud_rate):
 parameter(input_parameter), command(input_command), baud_rate(input_baud_rate)
 {
     set_checksum(calculate_checksum());
@@ -37,24 +37,24 @@ parameter(input_parameter), command(input_command), baud_rate(input_baud_rate)
 
 /// @brief Set parameter for command packet
 /// @param double_word input_parameter, the parameter to set for the command packet
-void Fingerprintsensor::Command_packet::set_parameter(double_word input_parameter) {
+void GT511C1R::Command_packet::set_parameter(double_word input_parameter) {
     parameter = input_parameter;
 }
 
 /// @brief Set command for command packet
 /// @param word input_command, the command to set for the command packet
-void Fingerprintsensor::Command_packet::set_command(word input_command) {
+void GT511C1R::Command_packet::set_command(word input_command) {
     command = input_command;
 }
 
 /// @brief Set checksum for command packet
 /// @param word input_checksum, the checksum to set for the command packet
-void Fingerprintsensor::Command_packet::set_checksum(word input_checksum) {
+void GT511C1R::Command_packet::set_checksum(word input_checksum) {
     checksum = input_checksum;
 }
 
 /// @brief Calculate checksum for command packet
-word Fingerprintsensor::Command_packet::calculate_checksum() {
+word GT511C1R::Command_packet::calculate_checksum() {
     word temp_checksum = 0;
     temp_checksum += start_code1;
     temp_checksum += start_code2;  
@@ -66,7 +66,7 @@ word Fingerprintsensor::Command_packet::calculate_checksum() {
 
 /// @brief Send the command which should be initialized from this packet via the UART protocol
 /// @param int input_baud_rate, controls the speed of the protocol
-void Fingerprintsensor::Command_packet::send() {
+void GT511C1R::Command_packet::send() {
     auto tx_pin = hwlib::target::pin_out( hwlib::target::pins::d18 );
     auto green_led = hwlib::target::pin_out( hwlib::target::pins::d2 );
 
@@ -91,22 +91,22 @@ void Fingerprintsensor::Command_packet::send() {
 }
 
 /// @brief Constructor for Response packet
-Fingerprintsensor::Response_packet::Response_packet(int input_baud_rate): 
+GT511C1R::Response_packet::Response_packet(int input_baud_rate): 
 baud_rate(input_baud_rate)
 {
     recieve();
 }
 
-double_word Fingerprintsensor::Response_packet::get_parameter_data() {
+double_word GT511C1R::Response_packet::get_parameter_data() {
     return parameter;
 }
 
-word Fingerprintsensor::Response_packet::get_response_data() {
+word GT511C1R::Response_packet::get_response_data() {
     return response;
 }
 
 /// @brief Recieve command which polls for a response, then acquires the needed data
-void Fingerprintsensor::Response_packet::recieve() {
+void GT511C1R::Response_packet::recieve() {
     auto rx_pin = hwlib::target::pin_in( hwlib::target::pins::d19 );
     auto red_led = hwlib::target::pin_out( hwlib::target::pins::d3 );
 
@@ -127,45 +127,45 @@ void Fingerprintsensor::Response_packet::recieve() {
 
     if (debug) {
         switch( (double_word)parameter ) {
-            case (double_word)Fingerprintsensor::response_packet_data::NO_ERROR:
+            case (double_word)GT511C1R::response_packet_data::NO_ERROR:
                 hwlib::cout << "NO_ERROR" << "\n"; break;
-            case (double_word)Fingerprintsensor::response_packet_data::NACK_TIMEOUT:
+            case (double_word)GT511C1R::response_packet_data::NACK_TIMEOUT:
                 hwlib::cout << "TIMEOUT" << "\n"; break;
-            case (double_word)Fingerprintsensor::response_packet_data::NACK_INVALID_BAUDRATE:
+            case (double_word)GT511C1R::response_packet_data::NACK_INVALID_BAUDRATE:
                 hwlib::cout << "INVALID_BAUDRATE" << "\n"; break;
-            case (double_word)Fingerprintsensor::response_packet_data::NACK_INVALID_POS:
+            case (double_word)GT511C1R::response_packet_data::NACK_INVALID_POS:
                 hwlib::cout << "INVALID_POS" << "\n"; break;
-            case (double_word)Fingerprintsensor::response_packet_data::NACK_IS_NOT_USED:
+            case (double_word)GT511C1R::response_packet_data::NACK_IS_NOT_USED:
                 hwlib::cout << "IS_NOT_USED" << "\n"; break;
-            case (double_word)Fingerprintsensor::response_packet_data::NACK_IS_ALREADY_USED:
+            case (double_word)GT511C1R::response_packet_data::NACK_IS_ALREADY_USED:
                 hwlib::cout << "IS_ALREADY_USED" << "\n"; break;
-            case (double_word)Fingerprintsensor::response_packet_data::NACK_COMM_ERR:
+            case (double_word)GT511C1R::response_packet_data::NACK_COMM_ERR:
                 hwlib::cout << "COMM_ERR" << "\n"; break;
-            case (double_word)Fingerprintsensor::response_packet_data::NACK_VERIFY_FAILED:
+            case (double_word)GT511C1R::response_packet_data::NACK_VERIFY_FAILED:
                 hwlib::cout << "VERIFY_FAILED" << "\n"; break;
-            case (double_word)Fingerprintsensor::response_packet_data::NACK_IDENTIFY_FAILED:
+            case (double_word)GT511C1R::response_packet_data::NACK_IDENTIFY_FAILED:
                 hwlib::cout << "IDENTIFY_FAILED" << "\n"; break;
-            case (double_word)Fingerprintsensor::response_packet_data::NACK_DB_IS_FULL:
+            case (double_word)GT511C1R::response_packet_data::NACK_DB_IS_FULL:
                 hwlib::cout << "DB_IS_FULL" << "\n"; break;
-            case (double_word)Fingerprintsensor::response_packet_data::NACK_DB_IS_EMPTY:
+            case (double_word)GT511C1R::response_packet_data::NACK_DB_IS_EMPTY:
                 hwlib::cout << "DB_IS_EMPTY" << "\n"; break;
-            case (double_word)Fingerprintsensor::response_packet_data::NACK_TURN_ERR:
+            case (double_word)GT511C1R::response_packet_data::NACK_TURN_ERR:
                 hwlib::cout << "TURN_ERR" << "\n"; break;
-            case (double_word)Fingerprintsensor::response_packet_data::NACK_BAD_FINGER:
+            case (double_word)GT511C1R::response_packet_data::NACK_BAD_FINGER:
                 hwlib::cout << "BAD_FINGER" << "\n"; break;
-            case (double_word)Fingerprintsensor::response_packet_data::NACK_ENROLL_FAILED:
+            case (double_word)GT511C1R::response_packet_data::NACK_ENROLL_FAILED:
                 hwlib::cout << "ENROLL_FAILED" << "\n"; break;
-            case (double_word)Fingerprintsensor::response_packet_data::NACK_IS_NOT_SUPPORTED:
+            case (double_word)GT511C1R::response_packet_data::NACK_IS_NOT_SUPPORTED:
                 hwlib::cout << "IS_NOT_SUPPORTED" << "\n"; break;
-            case (double_word)Fingerprintsensor::response_packet_data::NACK_DEV_ERR:
+            case (double_word)GT511C1R::response_packet_data::NACK_DEV_ERR:
                 hwlib::cout << "DEV_ERR" << "\n"; break;
-            case (double_word)Fingerprintsensor::response_packet_data::NACK_CAPTURE_CANCELED:
+            case (double_word)GT511C1R::response_packet_data::NACK_CAPTURE_CANCELED:
                 hwlib::cout << "CAPTURE_CANCELED" << "\n"; break;
-            case (double_word)Fingerprintsensor::response_packet_data::NACK_INVALID_PARAM:
+            case (double_word)GT511C1R::response_packet_data::NACK_INVALID_PARAM:
                 hwlib::cout << "INVALID_PARAM" << "\n"; break;
-            case (double_word)Fingerprintsensor::response_packet_data::NACK_FINGER_IS_NOT_PRESSED:
+            case (double_word)GT511C1R::response_packet_data::NACK_FINGER_IS_NOT_PRESSED:
                 hwlib::cout << "FINGER_IS_NOT_PRESSED" << "\n"; break;
-            case (double_word)Fingerprintsensor::response_packet_data::INVALID:
+            case (double_word)GT511C1R::response_packet_data::INVALID:
                 hwlib::cout << "INVALID" << "\n"; break;
             default:
                 hwlib::cout << "\f" << "NOTHING" << "\n";
@@ -178,9 +178,9 @@ Communication Commands functions
 */ // =======================================================================================================================
 
 /// @brief Initialise the fingerprint sensor
-int Fingerprintsensor::initialise() {
-    Fingerprintsensor::Command_packet command_packet(0x00, ((word) command_packet_data::Open), baud_rate);
-    Fingerprintsensor::Response_packet response_packet(baud_rate);
+int GT511C1R::initialise() {
+    GT511C1R::Command_packet command_packet(0x00, ((word) command_packet_data::Open), baud_rate);
+    GT511C1R::Response_packet response_packet(baud_rate);
 
     if (debug) {
         hwlib::cout << "Initialise" << "\n";
@@ -194,12 +194,12 @@ int Fingerprintsensor::initialise() {
 
 /// @brief Control the led
 /// @param bool on, true for turning the led on and false for turning it off
-int Fingerprintsensor::control_led(bool on) {
+int GT511C1R::control_led(bool on) {
     double input_parameter;
     if (on) { input_parameter = 0x01; } 
     else {  input_parameter = 0x00; }
-    Fingerprintsensor::Command_packet command_packet(input_parameter, ((word) command_packet_data::CmosLed), baud_rate);
-    Fingerprintsensor::Response_packet response_packet(baud_rate);
+    GT511C1R::Command_packet command_packet(input_parameter, ((word) command_packet_data::CmosLed), baud_rate);
+    GT511C1R::Response_packet response_packet(baud_rate);
 
     if (debug) {
         hwlib::cout << "Control led" << "\n";
@@ -219,9 +219,9 @@ int Fingerprintsensor::control_led(bool on) {
 
 /// @brief Change the internal baud rate of the fingerprint sensor
 /// @param int baud_rate, baud rate to set (between 9600 - 115200)
-int Fingerprintsensor::change_baud_rate(int input_baud_rate) {
-    Fingerprintsensor::Command_packet command_packet(input_baud_rate, ((word) command_packet_data::ChangeBaudrate), baud_rate);
-    Fingerprintsensor::Response_packet response_packet(baud_rate);
+int GT511C1R::change_baud_rate(int input_baud_rate) {
+    GT511C1R::Command_packet command_packet(input_baud_rate, ((word) command_packet_data::ChangeBaudrate), baud_rate);
+    GT511C1R::Response_packet response_packet(baud_rate);
     baud_rate = input_baud_rate;
 
     if (debug) {
@@ -231,9 +231,9 @@ int Fingerprintsensor::change_baud_rate(int input_baud_rate) {
 }
 
 /// @brief Get enrolled fingerprint count
-int Fingerprintsensor::get_enrolled_fingerprint_count() {
-    Fingerprintsensor::Command_packet command_packet(0x00, ((word) command_packet_data::GetEnrollCount), baud_rate);
-    Fingerprintsensor::Response_packet response_packet(baud_rate);
+int GT511C1R::get_enrolled_fingerprint_count() {
+    GT511C1R::Command_packet command_packet(0x00, ((word) command_packet_data::GetEnrollCount), baud_rate);
+    GT511C1R::Response_packet response_packet(baud_rate);
 
     if (debug) {
         hwlib::cout << "Get count" << "\n";
@@ -244,9 +244,9 @@ int Fingerprintsensor::get_enrolled_fingerprint_count() {
 
 /// @brief Check status of fingerprint id
 /// @param int id, value between 0 - 19
-int Fingerprintsensor::check_enrollment_status(int id) {
-    Fingerprintsensor::Command_packet command_packet(id, ((word) command_packet_data::CheckEnrolled), baud_rate);
-    Fingerprintsensor::Response_packet response_packet(baud_rate);
+int GT511C1R::check_enrollment_status(int id) {
+    GT511C1R::Command_packet command_packet(id, ((word) command_packet_data::CheckEnrolled), baud_rate);
+    GT511C1R::Response_packet response_packet(baud_rate);
 
     if (debug) {
         hwlib::cout << "Check status" << "\n";
@@ -256,10 +256,10 @@ int Fingerprintsensor::check_enrollment_status(int id) {
 
 /// @brief Start a fingerprint enrollment
 /// @param int id, value between 0 - 19
-int Fingerprintsensor::start_enrollment() {
+int GT511C1R::start_enrollment() {
     double input_parameter = get_enrolled_fingerprint_count();
-    Fingerprintsensor::Command_packet command_packet(input_parameter, ((word) command_packet_data::EnrollStart), baud_rate);
-    Fingerprintsensor::Response_packet response_packet(baud_rate);
+    GT511C1R::Command_packet command_packet(input_parameter, ((word) command_packet_data::EnrollStart), baud_rate);
+    GT511C1R::Response_packet response_packet(baud_rate);
 
     if (debug) {
         hwlib::cout << "Start enrollment" << "\n";
@@ -276,7 +276,7 @@ int Fingerprintsensor::start_enrollment() {
 
 /// @brief Function for each of the 3 enrollments based on the parameter
 /// @param int template, control over the enrollment number
-int Fingerprintsensor::enrollment(int template_number) {
+int GT511C1R::enrollment(int template_number) {
     word input_command;
     if (template_number == 1) {
         input_command = ((word) command_packet_data::Enroll1);
@@ -285,8 +285,8 @@ int Fingerprintsensor::enrollment(int template_number) {
     } else if ( template_number == 3) {
         input_command = ((word) command_packet_data::Enroll3);
     }
-    Fingerprintsensor::Command_packet command_packet(0x00, input_command, baud_rate);
-    Fingerprintsensor::Response_packet response_packet(baud_rate);
+    GT511C1R::Command_packet command_packet(0x00, input_command, baud_rate);
+    GT511C1R::Response_packet response_packet(baud_rate);
 
     if (debug) {
         hwlib::cout << "Enrollment" << "\n";
@@ -301,10 +301,10 @@ int Fingerprintsensor::enrollment(int template_number) {
     return 0;
 }
 
-/// @brief Check if a finger sits on the fingerprintsensor
-int Fingerprintsensor::check_finger_pressing_status() {
-    Fingerprintsensor::Command_packet command_packet(0x00, ((word) command_packet_data::IsPressFinger), baud_rate);
-    Fingerprintsensor::Response_packet response_packet(baud_rate);
+/// @brief Check if a finger sits on the GT511C1R
+int GT511C1R::check_finger_pressing_status() {
+    GT511C1R::Command_packet command_packet(0x00, ((word) command_packet_data::IsPressFinger), baud_rate);
+    GT511C1R::Response_packet response_packet(baud_rate);
 
     if (debug) {
         hwlib::cout << "Check fingerpress" << "\n";
@@ -313,10 +313,10 @@ int Fingerprintsensor::check_finger_pressing_status() {
 }
 
 /// @brief Delete one fingerprint based on a id
-/// @param int id, id to delete from the fingerprintsensor
-int Fingerprintsensor::delete_one_fingerprint(int id) {
-    Fingerprintsensor::Command_packet command_packet(id, ((word) command_packet_data::DeleteID), baud_rate);
-    Fingerprintsensor::Response_packet response_packet(baud_rate);
+/// @param int id, id to delete from the GT511C1R
+int GT511C1R::delete_one_fingerprint(int id) {
+    GT511C1R::Command_packet command_packet(id, ((word) command_packet_data::DeleteID), baud_rate);
+    GT511C1R::Response_packet response_packet(baud_rate);
 
     if (debug) {
         hwlib::cout << "Delete one fingerprint" << "\n";
@@ -325,10 +325,10 @@ int Fingerprintsensor::delete_one_fingerprint(int id) {
 }
 
 /// @brief Delete one fingerprint based on a id
-/// @param int id, id to delete from the fingerprintsensor
-int Fingerprintsensor::delete_all_fingerprints() {
-    Fingerprintsensor::Command_packet command_packet(0x00, ((word) command_packet_data::DeleteAll), baud_rate);
-    Fingerprintsensor::Response_packet response_packet(baud_rate);
+/// @param int id, id to delete from the GT511C1R
+int GT511C1R::delete_all_fingerprints() {
+    GT511C1R::Command_packet command_packet(0x00, ((word) command_packet_data::DeleteAll), baud_rate);
+    GT511C1R::Response_packet response_packet(baud_rate);
 
     if (debug) {
         hwlib::cout << "Delete all fingerprints" << "\n";
@@ -342,9 +342,9 @@ int Fingerprintsensor::delete_all_fingerprints() {
 
 /// @brief Verify a fingerprint based on id
 /// @param int id, id to verify a fingerprint with
-int Fingerprintsensor::verification_1_1(int id) {
-    Fingerprintsensor::Command_packet command_packet(id, ((word) command_packet_data::Verify1_1), baud_rate);
-    Fingerprintsensor::Response_packet response_packet(baud_rate);
+int GT511C1R::verification_1_1(int id) {
+    GT511C1R::Command_packet command_packet(id, ((word) command_packet_data::Verify1_1), baud_rate);
+    GT511C1R::Response_packet response_packet(baud_rate);
 
     if (debug) {
         hwlib::cout << "Verification 1:1" << "\n";
@@ -360,9 +360,9 @@ int Fingerprintsensor::verification_1_1(int id) {
 }
 
 /// @brief Verify a fingerprint on all existing fingerprints
-int Fingerprintsensor::identification_1_N() {
-    Fingerprintsensor::Command_packet command_packet(0x00, ((word) command_packet_data::Identify1_N), baud_rate);
-    Fingerprintsensor::Response_packet response_packet(baud_rate);
+int GT511C1R::identification_1_N() {
+    GT511C1R::Command_packet command_packet(0x00, ((word) command_packet_data::Identify1_N), baud_rate);
+    GT511C1R::Response_packet response_packet(baud_rate);
 
 
     if (debug) {
@@ -377,17 +377,17 @@ int Fingerprintsensor::identification_1_N() {
     } else { return ERROR_NO_VALID_RESPONSE; }
 }
 
-/// @brief Capture a fingerprint on the fingerprintsensor
-/// @param int quality, controls the quality taken with the fingerprintsensor
-int Fingerprintsensor::capture_fingerprint(const char* quality) {
+/// @brief Capture a fingerprint on the GT511C1R
+/// @param int quality, controls the quality taken with the GT511C1R
+int GT511C1R::capture_fingerprint(const char* quality) {
     double input_parameter;
     if (strcmp(quality, "fast")) {
         input_parameter = 0x00;
     } else if (strcmp(quality, "best")) {
         input_parameter = 0x01;
     }
-    Fingerprintsensor::Command_packet command_packet(input_parameter, ((word) command_packet_data::CaptureFinger), baud_rate);
-    Fingerprintsensor::Response_packet response_packet(baud_rate);
+    GT511C1R::Command_packet command_packet(input_parameter, ((word) command_packet_data::CaptureFinger), baud_rate);
+    GT511C1R::Response_packet response_packet(baud_rate);
 
     if (debug) {
         hwlib::cout << "Capture" << "\n";
@@ -401,9 +401,9 @@ int Fingerprintsensor::capture_fingerprint(const char* quality) {
 }
 
 /// @brief Terminate/close the fingerprint sensor
-int Fingerprintsensor::terminate() {
-    Fingerprintsensor::Command_packet command_packet(0x00, ((word) command_packet_data::Close), baud_rate);
-    Fingerprintsensor::Response_packet response_packet(baud_rate);
+int GT511C1R::terminate() {
+    GT511C1R::Command_packet command_packet(0x00, ((word) command_packet_data::Close), baud_rate);
+    GT511C1R::Response_packet response_packet(baud_rate);
 
     if (debug) {
         hwlib::cout << "Terminate" << "\n";
@@ -419,7 +419,7 @@ Control Commands functions
 */ // =======================================================================================================================
 
 /// @brief Identify a fingerprint according to the steps to take in the datasheet
-int Fingerprintsensor::identify_fingerprint() {
+int GT511C1R::identify_fingerprint() {
     auto green_led = hwlib::target::pin_out( hwlib::target::pins::d4 );
     auto red_led = hwlib::target::pin_out( hwlib::target::pins::d5 );
     int identification_id;
@@ -440,7 +440,7 @@ int Fingerprintsensor::identify_fingerprint() {
 }
 
 /// @brief Identify a fingerprint for one try according to the steps to take in the datasheet
-int Fingerprintsensor::identify_fingerprint_try_check_finger_pressing_status_once() {
+int GT511C1R::identify_fingerprint_try_check_finger_pressing_status_once() {
     int identification_id = -1;
 
     control_led(true);
@@ -457,7 +457,7 @@ int Fingerprintsensor::identify_fingerprint_try_check_finger_pressing_status_onc
 }
 
 /// @brief Register a fingerprint according to the steps to take in the datasheet
-int Fingerprintsensor::register_fingerprint() {
+int GT511C1R::register_fingerprint() {
     auto green_led = hwlib::target::pin_out( hwlib::target::pins::d4 );
     auto red_led = hwlib::target::pin_out( hwlib::target::pins::d5 );
     // int registration_id = 

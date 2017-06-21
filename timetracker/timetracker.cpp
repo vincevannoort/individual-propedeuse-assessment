@@ -61,7 +61,7 @@ Timetracker
 */ // =======================================================================================================================
 
 // @brief Constructor for the timetracker
-Timetracker::Timetracker(Fingerprintsensor & fps, i2cRTClib & rtc, hwlib::pin_in & checking_pin, hwlib::pin_in & registering_pin, hwlib::pin_in & storing_pin, Time initial_time):
+Timetracker::Timetracker(GT511C1R & fps, i2cRTClib & rtc, hwlib::pin_in & checking_pin, hwlib::pin_in & registering_pin, hwlib::pin_in & storing_pin, Time initial_time):
 fps(fps), rtc(rtc), checking_pin(checking_pin), registering_pin(registering_pin), storing_pin(storing_pin), status(0) {
 	rtc.set_time(initial_time.seconds, initial_time.minutes, initial_time.hours, initial_time.day, initial_time.date, initial_time.month, initial_time.year);
 }

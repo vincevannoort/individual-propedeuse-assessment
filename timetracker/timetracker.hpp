@@ -1,7 +1,7 @@
 #ifndef TIMETRACKER_H
 #define TIMETRACKER_H
 
-#include "../fingerprintsensor/fingerprintsensor.hpp"
+#include "../GT511C1R/GT511C1R.hpp"
 #include "../realtimeclock/i2cRTC.hpp"
 #include <cstring>
 #include "hwlib.hpp"
@@ -57,7 +57,7 @@ Timetracker
 */
 class Timetracker {
 private:
-	Fingerprintsensor & fps;
+	GT511C1R & fps;
 	i2cRTClib & rtc;
 	hwlib::pin_in & checking_pin, & registering_pin, & storing_pin;
 
@@ -70,7 +70,7 @@ private:
 
 	Workday time_entries[20];
 public:
-	Timetracker(Fingerprintsensor & fps, i2cRTClib & rtc, hwlib::pin_in & checking_pin, hwlib::pin_in & registering_pin, hwlib::pin_in & storing_pin, Time initial_time);
+	Timetracker(GT511C1R & fps, i2cRTClib & rtc, hwlib::pin_in & checking_pin, hwlib::pin_in & registering_pin, hwlib::pin_in & storing_pin, Time initial_time);
 	void start_tracking();
 	void check_buttons_and_store_status();
 	void display_change_status(int status);

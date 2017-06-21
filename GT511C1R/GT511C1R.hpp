@@ -1,5 +1,5 @@
-#ifndef FINGERPRINTSENSOR_H
-#define FINGERPRINTSENSOR_H
+#ifndef GT511C1R_H
+#define GT511C1R_H
 
 #include <stdint.h>
 #include "hwlib.hpp"
@@ -10,17 +10,17 @@ typedef int16_t word;
 typedef int32_t double_word;
 
 /*
-Fingerprintsensor
+GT511C1R
 */
 // @brief Class for the GT-511C1R fingeprintsensor
-class Fingerprintsensor {
+class GT511C1R {
 public:
     /*
     Constructor
     */
-    Fingerprintsensor();
-    Fingerprintsensor(hwlib::pin_out & tx, hwlib::pin_in & rx);
-    ~Fingerprintsensor();
+    GT511C1R();
+    GT511C1R(hwlib::pin_out & tx, hwlib::pin_in & rx);
+    ~GT511C1R();
 
 protected:
     /*
