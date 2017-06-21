@@ -14,17 +14,13 @@ typedef int32_t double_word;
 /*
 Employee
 */
-// class Employee {
-// private:
-// 	char first_name [20];
-// 	char last_name [30];
-// public:
-// 	// Employee(char first_name [20], char last_name [30], byte hours_worked);
-// 	Employee();
-// 	char* get_name();
-// 	void set_hours_worked();
-// 	int get_hours_worked();
-// };
+class Employee {
+public:
+	char first_name[20];
+	char last_name[30];
+	Employee();
+	Employee(const char* first_name_array, int size_first_name, const char* last_name_array, int size_last_name);
+};
 
 /*
 Time
@@ -49,8 +45,7 @@ class Workday {
 public:
 	Time start_time;
 	Time end_time;
-	// Employee employee_of_workday;
-public:
+	Employee employee_of_workday;
 	Workday();
 	void start_day(Time t);
 	void end_day(Time t);
@@ -70,8 +65,7 @@ private:
 	enum class status_data: int {
 		Checking = 0,
 		Registering = 1,
-		Identifying = 2,
-		StoringData = 3,
+		StoringData = 2,
 	};
 
 	Workday time_entries[20];
@@ -79,7 +73,9 @@ public:
 	Timetracker(Fingerprintsensor & fps, i2cRTClib & rtc, hwlib::pin_in & checking_pin, hwlib::pin_in & registering_pin, hwlib::pin_in & storing_pin, Time initial_time);
 	void start_tracking();
 	void check_buttons_and_store_status();
+	void display_change_status(int status);
 	Time get_current_time_as_time_class();
+	void set_workday_employee(int employee_id, Employee employee_to_copy);
 };
 
 #endif

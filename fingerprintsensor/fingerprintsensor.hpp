@@ -12,6 +12,7 @@ typedef int32_t double_word;
 /*
 Fingerprintsensor
 */
+// @brief Class for the GT-511C1R fingeprintsensor
 class Fingerprintsensor {
 public:
     /*

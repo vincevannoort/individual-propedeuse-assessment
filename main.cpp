@@ -1,7 +1,6 @@
 #include "./fingerprintsensor/fingerprintsensor.hpp"
 #include "./timetracker/timetracker.hpp"
 #include "./realtimeclock/i2cRTC.hpp"
-// #include "./unit_tests/unit_tes`ts.hpp"
 #include "hwlib.hpp"
 using namespace std;
 
@@ -16,17 +15,6 @@ int main() {
 	auto rx_pin = hwlib::target::pin_in( hwlib::target::pins::d19 );
  	Fingerprintsensor fingerprintsensor(tx_pin, rx_pin);
 	fingerprintsensor.initialise();
-	// fingerprintsensor.control_led(true);
-	// hwlib::wait_ms(1000);
-	// fingerprintsensor.control_led(false);
-	// fingerprintsensor.delete_all_fingerprints();
-	// fingerprintsensor.register_fingerprint();
-	// hwlib::wait_ms(1000);
-	// int i = 0;
-	// while(1) {
-	// 	int ret_val = fingerprintsensor.identify_fingerprint_try_check_finger_pressing_status_once();
-	// 	hwlib::cout << "try " << i++ << ": " << ret_val << "\n";
-	// }
 
 	/*
 	Realtimeclock
@@ -35,12 +23,6 @@ int main() {
 	auto sda = due::pin_oc( hwlib::target::pins::d9 );
 	auto i2c = hwlib::i2c_bus_bit_banged_scl_sda( scl, sda );
 	i2cRTClib realtimeclock(i2c, 0, 0, 0, 0, 23, 5, 2017);
-	// hwlib::wait_ms(1000);
-	// hwlib::cout << "Start checking!\n";
-	// while(1) {
-	// 	hwlib::wait_ms(1000);
-	// 	hwlib::cout << realtimeclock.get_seconden() << "\n"; 
-	// }
 
 	/*
 	Timetracker
@@ -48,6 +30,12 @@ int main() {
 	auto checking_pin = hwlib::target::pin_in( hwlib::target::pins::d11 );
 	auto registering_pin = hwlib::target::pin_in( hwlib::target::pins::d12 );
 	auto storing_pin = hwlib::target::pin_in( hwlib::target::pins::d13 );
-	Timetracker timetracker( fingerprintsensor, realtimeclock, checking_pin, registering_pin, storing_pin, Time( 0, 0, 0, 0, 23, 5, 2017 ));
+	Timetracker timetracker(fingerprintsensor, realtimeclock, checking_pin, registering_pin, storing_pin, Time( 0, 0, 0, 0, 23, 5, 2017 ));
+	Employee vince("Vince", sizeof("Vince"), "van Noort", sizeof("van Noort"));
+	Employee wouter("Wouter", sizeof("Wouter"), "van Ooijen", sizeof("van Ooijen"));
+	Employee joost("Joost", sizeof("Joost"), "Schalken", sizeof("Schalken"));
+	timetracker.set_workday_employee(0, vince);
+	timetracker.set_workday_employee(1, wouter);
+	timetracker.set_workday_employee(2, joost);
 	timetracker.start_tracking();
 }
