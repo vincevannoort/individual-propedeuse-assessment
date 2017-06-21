@@ -37,6 +37,7 @@ public:
 	word year;
 	Time();
 	Time(byte seconds, byte minutes, byte hours, byte day, byte date, byte month, word year);
+	Time operator-( const Time & rhs ) const;
 };
 
 /*

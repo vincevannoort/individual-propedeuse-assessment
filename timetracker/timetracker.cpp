@@ -41,7 +41,7 @@ void Workday::end_day(Time t) {
 
 // @brief Calculate hours worked
 uint_fast64_t Workday::calculate_work_time() {
-	return 0; // end_time - start_time;
+	return end_time - start_time; // end_time - start_time;
 }
 
 /* ==========================================================================================================================
@@ -55,6 +55,26 @@ seconds(0), minutes(0), hours(0), day(0), date(0), month(0), year(2000) {}
 // @brief Constructor for time
 Time::Time(byte seconds, byte minutes, byte hours, byte day, byte date, byte month, word year):
 seconds(seconds), minutes(minutes), hours(hours), day(day), date(date), month(month), year(year) {}
+
+Time Time::operator-( const Time & rhs ) const {
+	int difference_seconds = 0;
+	int difference_minutes = 0;
+	int difference_hours = 0;
+
+	if(seconds < rhs.seconds) {
+        --difference_minutes;
+        difference_seconds += 60;
+    }
+    if(minutes > rhs.minutes) {
+        --difference_hours;
+        difference_minutes += 60;
+    }
+
+    difference_seconds += (seconds - rhs.seconds);
+    difference_minutes += (minutes - rhs.minutes);
+    difference_hours += (hours - rhs.hours);
+    return Time(difference_seconds, difference_minutes, difference_hours, day, date, month, year);
+}
 
 /* ==========================================================================================================================
 Timetracker
