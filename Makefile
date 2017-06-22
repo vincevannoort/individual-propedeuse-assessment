@@ -12,7 +12,7 @@
 SOURCES := GT511C1R/GT511C1R.cpp timetracker/timetracker.cpp
 
 # header files in this project
-HEADERS := GT511C1R/GT511C1R.hpp timetracker/timetracker.cpp realtimeclock/i2cRTC.hpp
+HEADERS := GT511C1R/GT511C1R.hpp timetracker/timetracker.cpp DS1307/i2cRTC.hpp
 
 # other places to look for files for this project
 SEARCH  := 

@@ -1,6 +1,6 @@
 #include "./GT511C1R/GT511C1R.hpp"
 #include "./timetracker/timetracker.hpp"
-#include "./realtimeclock/i2cRTC.hpp"
+#include "./DS1307/i2cRTC.hpp"
 #include "hwlib.hpp"
 using namespace std;
 

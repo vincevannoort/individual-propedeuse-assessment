@@ -3,7 +3,7 @@
 
 #include "../GT511C1R/GT511C1R.hpp"
 #include "../GT511C1R/fingerprintsensor-interface.hpp"
-#include "../realtimeclock/i2cRTC.hpp"
+#include "../DS1307/i2cRTC.hpp"
 #include <cstring>
 #include "hwlib.hpp"
 
