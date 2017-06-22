@@ -28,8 +28,8 @@ Constructors
 */
 
 /// @brief Constructor for Command packet, after calculating the command packet is send
-GT511C1R::Command_packet::Command_packet(double_word input_parameter, word input_command, int input_baud_rate):
-parameter(input_parameter), command(input_command), baud_rate(input_baud_rate)
+GT511C1R::Command_packet::Command_packet(double_word input_parameter, word input_command, int input_baud_rate, hwlib::pin_out & tx):
+parameter(input_parameter), command(input_command), baud_rate(input_baud_rate), tx_pin(tx)
 {
     set_checksum(calculate_checksum());
     send();
@@ -68,7 +68,6 @@ word GT511C1R::Command_packet::calculate_checksum() {
 /// @brief Send the command which should be initialized from this packet via the UART protocol
 /// @param int input_baud_rate, controls the speed of the protocol
 void GT511C1R::Command_packet::send() {
-    auto tx_pin = hwlib::target::pin_out( hwlib::target::pins::d18 ); // Tried moving it to GT511C1R without succes
     auto green_led = hwlib::target::pin_out( hwlib::target::pins::d2 );
 
     packet[0] = start_code1;
@@ -92,8 +91,8 @@ void GT511C1R::Command_packet::send() {
 }
 
 /// @brief Constructor for Response packet, tries to recieve the response packet after setup
-GT511C1R::Response_packet::Response_packet(int input_baud_rate): 
-baud_rate(input_baud_rate)
+GT511C1R::Response_packet::Response_packet(int input_baud_rate, hwlib::pin_in & rx): 
+baud_rate(input_baud_rate), rx_pin(rx)
 {
     recieve();
 }
@@ -110,7 +109,6 @@ word GT511C1R::Response_packet::get_response_data() {
 
 /// @brief Recieve command which polls for a response, then acquires the needed data
 void GT511C1R::Response_packet::recieve() {
-    auto rx_pin = hwlib::target::pin_in( hwlib::target::pins::d19 ); // Tried moving it to GT511C1R without succes
     auto red_led = hwlib::target::pin_out( hwlib::target::pins::d3 );
 
     red_led.set(1);
@@ -183,8 +181,8 @@ Communication Commands functions
 /// @brief Initialise the fingerprint sensor
 /// @return int parameter, may be used for debugging
 int GT511C1R::initialise() {
-    GT511C1R::Command_packet command_packet(0x00, ((word) command_packet_data::Open), baud_rate);
-    GT511C1R::Response_packet response_packet(baud_rate);
+    GT511C1R::Command_packet command_packet(0x00, ((word) command_packet_data::Open), baud_rate, tx);
+    GT511C1R::Response_packet response_packet(baud_rate, rx);
 
     if (debug) {
         hwlib::cout << "Initialise" << "\n";
@@ -203,8 +201,8 @@ int GT511C1R::control_led(bool on) {
     double input_parameter;
     if (on) { input_parameter = 0x01; } 
     else {  input_parameter = 0x00; }
-    GT511C1R::Command_packet command_packet(input_parameter, ((word) command_packet_data::CmosLed), baud_rate);
-    GT511C1R::Response_packet response_packet(baud_rate);
+    GT511C1R::Command_packet command_packet(input_parameter, ((word) command_packet_data::CmosLed), baud_rate, tx);
+    GT511C1R::Response_packet response_packet(baud_rate, rx);
 
     if (debug) {
         hwlib::cout << "Control led" << "\n";
@@ -226,8 +224,8 @@ int GT511C1R::control_led(bool on) {
 /// @param int baud_rate, baud rate to set (between 9600 - 115200)
 /// @return int parameter, may be used for debugging
 int GT511C1R::change_baud_rate(int input_baud_rate) {
-    GT511C1R::Command_packet command_packet(input_baud_rate, ((word) command_packet_data::ChangeBaudrate), baud_rate);
-    GT511C1R::Response_packet response_packet(baud_rate);
+    GT511C1R::Command_packet command_packet(input_baud_rate, ((word) command_packet_data::ChangeBaudrate), baud_rate, tx);
+    GT511C1R::Response_packet response_packet(baud_rate, rx);
     baud_rate = input_baud_rate;
 
     if (debug) {
@@ -239,8 +237,8 @@ int GT511C1R::change_baud_rate(int input_baud_rate) {
 /// @brief Get enrolled fingerprint count
 /// @return int parameter, used for enrolling as the count is returned
 int GT511C1R::get_enrolled_fingerprint_count() {
-    GT511C1R::Command_packet command_packet(0x00, ((word) command_packet_data::GetEnrollCount), baud_rate);
-    GT511C1R::Response_packet response_packet(baud_rate);
+    GT511C1R::Command_packet command_packet(0x00, ((word) command_packet_data::GetEnrollCount), baud_rate, tx);
+    GT511C1R::Response_packet response_packet(baud_rate, rx);
 
     if (debug) {
         hwlib::cout << "Get count" << "\n";
@@ -253,8 +251,8 @@ int GT511C1R::get_enrolled_fingerprint_count() {
 /// @param int id, value between 0 - 19
 /// @return int parameter, may be used for debugging
 int GT511C1R::check_enrollment_status(int id) {
-    GT511C1R::Command_packet command_packet(id, ((word) command_packet_data::CheckEnrolled), baud_rate);
-    GT511C1R::Response_packet response_packet(baud_rate);
+    GT511C1R::Command_packet command_packet(id, ((word) command_packet_data::CheckEnrolled), baud_rate, tx);
+    GT511C1R::Response_packet response_packet(baud_rate, rx);
 
     if (debug) {
         hwlib::cout << "Check status" << "\n";
@@ -273,8 +271,8 @@ int GT511C1R::check_enrollment_status(int id) {
 /// @return int parameter, may be used for debugging
 int GT511C1R::start_enrollment() {
     double input_parameter = get_enrolled_fingerprint_count();
-    GT511C1R::Command_packet command_packet(input_parameter, ((word) command_packet_data::EnrollStart), baud_rate);
-    GT511C1R::Response_packet response_packet(baud_rate);
+    GT511C1R::Command_packet command_packet(input_parameter, ((word) command_packet_data::EnrollStart), baud_rate, tx);
+    GT511C1R::Response_packet response_packet(baud_rate, rx);
 
     if (debug) {
         hwlib::cout << "Start enrollment" << "\n";
@@ -301,8 +299,8 @@ int GT511C1R::enrollment(int template_number) {
     } else if ( template_number == 3) {
         input_command = ((word) command_packet_data::Enroll3);
     }
-    GT511C1R::Command_packet command_packet(0x00, input_command, baud_rate);
-    GT511C1R::Response_packet response_packet(baud_rate);
+    GT511C1R::Command_packet command_packet(0x00, input_command, baud_rate, tx);
+    GT511C1R::Response_packet response_packet(baud_rate, rx);
 
     if (debug) {
         hwlib::cout << "Enrollment" << "\n";
@@ -320,8 +318,8 @@ int GT511C1R::enrollment(int template_number) {
 /// @brief Check if a finger sits on the GT511C1R
 /// @return int parameter, 0 if finger is pressed, 1 if not
 int GT511C1R::check_finger_pressing_status() {
-    GT511C1R::Command_packet command_packet(0x00, ((word) command_packet_data::IsPressFinger), baud_rate);
-    GT511C1R::Response_packet response_packet(baud_rate);
+    GT511C1R::Command_packet command_packet(0x00, ((word) command_packet_data::IsPressFinger), baud_rate, tx);
+    GT511C1R::Response_packet response_packet(baud_rate, rx);
 
     if (debug) {
         hwlib::cout << "Check fingerpress" << "\n";
@@ -334,8 +332,8 @@ int GT511C1R::check_finger_pressing_status() {
 /// @param int id, id to delete from the GT511C1R
 /// @return int parameter, 1 if succesfull, -1 if not
 int GT511C1R::delete_one_fingerprint(int id) {
-    GT511C1R::Command_packet command_packet(id, ((word) command_packet_data::DeleteID), baud_rate);
-    GT511C1R::Response_packet response_packet(baud_rate);
+    GT511C1R::Command_packet command_packet(id, ((word) command_packet_data::DeleteID), baud_rate, tx);
+    GT511C1R::Response_packet response_packet(baud_rate, rx);
 
     if (debug) {
         hwlib::cout << "Delete one fingerprint" << "\n";
@@ -352,8 +350,8 @@ int GT511C1R::delete_one_fingerprint(int id) {
 /// @param int id, id to delete from the GT511C1R
 /// @return int parameter, 1 if succesfull, -1 if not
 int GT511C1R::delete_all_fingerprints() {
-    GT511C1R::Command_packet command_packet(0x00, ((word) command_packet_data::DeleteAll), baud_rate);
-    GT511C1R::Response_packet response_packet(baud_rate);
+    GT511C1R::Command_packet command_packet(0x00, ((word) command_packet_data::DeleteAll), baud_rate, tx);
+    GT511C1R::Response_packet response_packet(baud_rate, rx);
 
     if (debug) {
         hwlib::cout << "Delete all fingerprints" << "\n";
@@ -370,8 +368,8 @@ int GT511C1R::delete_all_fingerprints() {
 /// @param int id, id to verify a fingerprint with
 /// @return int parameter, 1 if succesfull, -1 if not
 int GT511C1R::verification_1_1(int id) {
-    GT511C1R::Command_packet command_packet(id, ((word) command_packet_data::Verify1_1), baud_rate);
-    GT511C1R::Response_packet response_packet(baud_rate);
+    GT511C1R::Command_packet command_packet(id, ((word) command_packet_data::Verify1_1), baud_rate, tx);
+    GT511C1R::Response_packet response_packet(baud_rate, rx);
 
     if (debug) {
         hwlib::cout << "Verification 1:1" << "\n";
@@ -389,8 +387,8 @@ int GT511C1R::verification_1_1(int id) {
 /// @brief Verify a fingerprint on all existing fingerprints
 /// @return int parameter, id of the identificated fingerprint, -1 if not
 int GT511C1R::identification_1_N() {
-    GT511C1R::Command_packet command_packet(0x00, ((word) command_packet_data::Identify1_N), baud_rate);
-    GT511C1R::Response_packet response_packet(baud_rate);
+    GT511C1R::Command_packet command_packet(0x00, ((word) command_packet_data::Identify1_N), baud_rate, tx);
+    GT511C1R::Response_packet response_packet(baud_rate, rx);
 
 
     if (debug) {
@@ -415,8 +413,8 @@ int GT511C1R::capture_fingerprint(const char* quality) {
     } else if (strcmp(quality, "best")) {
         input_parameter = 0x01;
     }
-    GT511C1R::Command_packet command_packet(input_parameter, ((word) command_packet_data::CaptureFinger), baud_rate);
-    GT511C1R::Response_packet response_packet(baud_rate);
+    GT511C1R::Command_packet command_packet(input_parameter, ((word) command_packet_data::CaptureFinger), baud_rate, tx);
+    GT511C1R::Response_packet response_packet(baud_rate, rx);
 
     if (debug) {
         hwlib::cout << "Capture" << "\n";
@@ -432,8 +430,8 @@ int GT511C1R::capture_fingerprint(const char* quality) {
 /// @brief Terminate/close the fingerprint sensor
 /// @return int parameter, 1 if succesfull
 int GT511C1R::terminate() {
-    GT511C1R::Command_packet command_packet(0x00, ((word) command_packet_data::Close), baud_rate);
-    GT511C1R::Response_packet response_packet(baud_rate);
+    GT511C1R::Command_packet command_packet(0x00, ((word) command_packet_data::Close), baud_rate, tx);
+    GT511C1R::Response_packet response_packet(baud_rate, rx);
 
     if (debug) {
         hwlib::cout << "Terminate" << "\n";

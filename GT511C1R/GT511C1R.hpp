@@ -114,9 +114,10 @@ public:
         word command;
         word checksum;
         int baud_rate;
+        hwlib::pin_out & tx_pin;
 
     public:
-        Command_packet(double_word input_parameter, word input_command, int input_baud_rate);
+        Command_packet(double_word input_parameter, word input_command, int input_baud_rate, hwlib::pin_out & tx);
         void set_parameter(double_word input_parameter);
         void set_command(word input_command);
         void set_checksum(word input_checksum);
@@ -137,9 +138,10 @@ public:
         word response;
         word checksum;
         int baud_rate;
+        hwlib::pin_in & rx_pin;
         
     public:
-        Response_packet(int input_baud_rate);
+        Response_packet(int input_baud_rate, hwlib::pin_in & rx);
         double_word get_parameter_data();
         word get_response_data();
         void recieve();
